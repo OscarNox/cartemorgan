@@ -60,11 +60,11 @@ export default function CarteBlanchePage() {
       {/* Editorial Navigation Overlay */}
       <nav className="fixed top-0 left-0 w-full p-8 flex justify-between items-start z-40 mix-blend-difference pointer-events-none">
         <div className="pointer-events-auto">
-          <h1 className="font-headline text-3xl text-white tracking-tighter">Carte Blanche.</h1>
-          <p className="font-body text-[10px] uppercase tracking-[0.4em] text-white/60">Nuestra coleccion 2025-2026</p>
+          <h1 className="font-headline text-3xl text-white tracking-tighter">Carte Morgan.</h1>
+          <p className="font-body text-[10px] uppercase tracking-[0.4em] text-white/60">Editorial 2025-2026</p>
         </div>
         <div className="vertical-label pointer-events-auto">
-          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Est. París / Londres</span>
+          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Est. Cotuí / Rep. Dom.</span>
         </div>
       </nav>
 
@@ -76,10 +76,10 @@ export default function CarteBlanchePage() {
         
         <div className="relative z-10 max-w-4xl text-center space-y-12 scroll-reveal">
           <div className="space-y-4">
-            <span className="text-xs font-body tracking-[0.5em] uppercase text-primary mb-4 block">Una Antología Personal</span>
+            <span className="text-xs font-body tracking-[0.5em] uppercase text-primary mb-4 block">Nuestra Propia Antologia</span>
             <h2 className="text-7xl md:text-9xl font-headline leading-none text-foreground">
-              Momentos <br /> 
-              <span className="italic pl-12 text-primary">Eternos.</span>
+              Nuestros <br /> 
+              <span className="italic pl-12 text-primary">Momentos.</span>
             </h2>
           </div>
           <div className="flex justify-center">

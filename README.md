@@ -1,51 +1,75 @@
-# Carte Blanche - Colección Editorial
+# Carte Blanche - Guía de Configuración Local y Despliegue
 
-Este es un proyecto de Next.js diseñado con una estética editorial de lujo, integrado con Firebase y Genkit para el análisis de documentos PDF mediante IA.
+Este proyecto es una aplicación de Next.js de alta gama con integración de IA (Genkit) y Firebase. Sigue esta guía para configurarlo en tu entorno local (VS Code) y desplegarlo.
 
-## Cómo mover este proyecto a VS Code
+## 1. Requisitos Previos
 
-Para trabajar en este proyecto localmente en tu computadora, sigue estos pasos:
+Antes de empezar, asegúrate de tener instalado:
+- **Node.js**: Versión 18.0 o superior ([Descárgalo aquí](https://nodejs.org/)).
+- **VS Code**: El editor recomendado.
+- **Git**: Para el control de versiones y despliegue.
 
-1. **Descarga el código**: Utiliza la función de exportación o descarga de esta plataforma para obtener todos los archivos en un archivo ZIP.
-2. **Abre en VS Code**: Descomprime el archivo y abre la carpeta resultante en Visual Studio Code.
-3. **Instala las dependencias**:
-   - Abre la terminal en VS Code (`Ctrl + J` o `Cmd + J`).
-   - Ejecuta: `npm install`
-4. **Configura el entorno**:
-   - Asegúrate de tener instalado [Node.js](https://nodejs.org/) (versión 18 o superior).
-   - Crea un archivo `.env.local` en la raíz y añade tus credenciales (GEMINI_API_KEY, etc.).
-5. **Ejecución**:
-   - Ejecuta `npm run dev`.
-   - Abre [http://localhost:9002](http://localhost:9002) en tu navegador.
+## 2. Configuración en VS Code
 
-## Cómo subir a Netlify
+1. **Descarga el Proyecto**: Extrae el archivo ZIP en una carpeta de tu preferencia.
+2. **Abre la Carpeta**: En VS Code, ve a `Archivo > Abrir Carpeta` y selecciona la raíz del proyecto.
+3. **Instala las Dependencias**:
+   Abre la terminal integrada en VS Code (`Ctrl + ñ` o `Cmd + J`) y ejecuta:
+   ```bash
+   npm install
+   ```
+   *Este comando instalará automáticamente todas las librerías necesarias: Next.js, Firebase, Genkit, Lucide Icons, Shadcn UI y Tailwind CSS.*
 
-Para desplegar tu aplicación en Netlify, sigue estos pasos:
+## 3. Variables de Entorno (CRÍTICO)
 
-1. **Sube tu código a GitHub**:
-   - Crea un nuevo repositorio en GitHub.
-   - Sigue las instrucciones para subir tus archivos locales:
-     ```bash
-     git init
-     git add .
-     git commit -m "Primer commit"
-     git branch -M main
-     git remote add origin TU_URL_DE_GITHUB
-     git push -u origin main
-     ```
-2. **Conecta con Netlify**:
-   - Entra en [Netlify.com](https://www.netlify.com/).
-   - Haz clic en **"Add new site"** > **"Import an existing project"**.
-   - Conecta tu cuenta de GitHub y selecciona el repositorio.
-3. **Configuración de construcción**:
-   - Netlify detectará automáticamente que es un proyecto de Next.js.
-   - **Build command**: `npm run build`
-   - **Publish directory**: `.next`
-4. **Variables de Entorno (IMPORTANTE)**:
-   - Ve a **"Site settings"** > **"Environment variables"**.
-   - Añade todas las variables que tienes en tu archivo `.env` (como `GEMINI_API_KEY` y las de Firebase) para que la IA y la base de datos funcionen en la nube.
-5. **Despliegue**:
-   - Haz clic en **"Deploy site"**. ¡Listo! Tu sitio estará en vivo en pocos minutos.
+La Inteligencia Artificial no funcionará sin una API Key. 
+1. Crea un archivo llamado `.env.local` en la raíz del proyecto.
+2. Añade tu clave de Google AI (Gemini):
+   ```env
+   GOOGLE_GENAI_API_KEY=tu_clave_aqui
+   ```
+   *Puedes obtener tu clave gratuita en [Google AI Studio](https://aistudio.google.com/).*
+
+## 4. Comandos de Ejecución
+
+- **Modo Desarrollo**: Para ver los cambios en tiempo real.
+  ```bash
+  npm run dev
+  ```
+  Luego abre [http://localhost:9002](http://localhost:9002).
+
+- **Interfaz de Genkit (Opcional)**: Para probar los flujos de IA de forma aislada.
+  ```bash
+  npm run genkit:dev
+  ```
+
+- **Construcción para Producción**:
+  ```bash
+  npm run build
+  ```
+
+## 5. Estructura de Dependencias Principales
+
+El proyecto utiliza las siguientes tecnologías clave:
+- `next`: Framework de React.
+- `genkit`: Para la lógica de IA y procesamiento de PDFs.
+- `@genkit-ai/google-genai`: Plugin para conectar con Gemini.
+- `firebase`: Para la base de datos y autenticación (si se activa).
+- `lucide-react`: Iconografía elegante.
+- `shadcn/ui`: Componentes de interfaz de usuario pre-diseñados.
+- `tailwind-merge` & `clsx`: Utilidades para manejo de clases CSS.
+
+## 6. Cómo Subir a Netlify
+
+1. **Crea un Repositorio en GitHub**: Sube tu código allí.
+2. **Conecta Netlify**:
+   - Ve a [Netlify](https://www.netlify.com/).
+   - Selecciona "Add new site" > "Import an existing project".
+   - Elige tu repositorio de GitHub.
+3. **Configura las Variables en Netlify**:
+   - Es vital ir a **Site Settings > Environment Variables**.
+   - Añade `GOOGLE_GENAI_API_KEY` con tu clave.
+4. **Despliegue**: Netlify usará automáticamente el archivo `netlify.toml` incluido para configurar la ruta de construcción.
 
 ---
-Desarrollado con un enfoque en la elegancia y la funcionalidad editorial.
+*Nota: Si encuentras errores de tipos al compilar, puedes usar `npm run build` que ya tiene ignorados los errores de TypeScript para facilitar el despliegue rápido.*
