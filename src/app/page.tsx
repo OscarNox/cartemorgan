@@ -61,7 +61,7 @@ export default function CarteBlanchePage() {
       <nav className="fixed top-0 left-0 w-full p-8 flex justify-between items-start z-40 mix-blend-difference pointer-events-none">
         <div className="pointer-events-auto">
           <h1 className="font-headline text-3xl text-white tracking-tighter">Carte Blanche.</h1>
-          <p className="font-body text-[10px] uppercase tracking-[0.4em] text-white/60">Colección Editorial 2025</p>
+          <p className="font-body text-[10px] uppercase tracking-[0.4em] text-white/60">Nuestra coleccion 2025-2026</p>
         </div>
         <div className="vertical-label pointer-events-auto">
           <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Est. París / Londres</span>
