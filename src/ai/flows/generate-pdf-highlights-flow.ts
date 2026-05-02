@@ -1,10 +1,11 @@
+
 'use server';
 /**
- * @fileOverview A Genkit flow that summarizes the key highlights of a PDF document.
+ * @fileOverview Un flujo de Genkit que resume los puntos clave de un documento PDF en español.
  *
- * - generatePdfHighlights - A function to generate key highlights from a PDF.
- * - GeneratePdfHighlightsInput - The input type for the generatePdfHighlights function.
- * - GeneratePdfHighlightsOutput - The return type for the generatePdfHighlights function.
+ * - generatePdfHighlights - Una función para generar puntos clave desde un PDF.
+ * - GeneratePdfHighlightsInput - El tipo de entrada para la función.
+ * - GeneratePdfHighlightsOutput - El tipo de salida para la función.
  */
 
 import {ai} from '@/ai/genkit';
@@ -14,13 +15,13 @@ const GeneratePdfHighlightsInputSchema = z.object({
   pdfDataUri: z
     .string()
     .describe(
-      "The PDF document content as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "El contenido del documento PDF como un data URI codificado en Base64. Formato esperado: 'data:<mimetype>;base64,<encoded_data>'."
     ),
 });
 export type GeneratePdfHighlightsInput = z.infer<typeof GeneratePdfHighlightsInputSchema>;
 
 const GeneratePdfHighlightsOutputSchema = z.object({
-  highlights: z.string().describe("A concise summary of the PDF's key highlights."),
+  highlights: z.string().describe("Un resumen conciso de los puntos clave del PDF en español."),
 });
 export type GeneratePdfHighlightsOutput = z.infer<typeof GeneratePdfHighlightsOutputSchema>;
 
@@ -32,10 +33,10 @@ const prompt = ai.definePrompt({
   name: 'generatePdfHighlightsPrompt',
   input: {schema: GeneratePdfHighlightsInputSchema},
   output: {schema: GeneratePdfHighlightsOutputSchema},
-  prompt: `You are an expert summarizer. Your task is to analyze the provided PDF document and extract its key highlights and main points.
-Present the highlights as a concise summary, suitable for a quick preview.
+  prompt: `Eres un experto en síntesis editorial. Tu tarea es analizar el documento PDF proporcionado y extraer sus puntos más importantes.
+Presenta los puntos clave como un resumen conciso y elegante, SIEMPRE en idioma ESPAÑOL.
 
-PDF Document: {{media url=pdfDataUri}}`,
+Documento PDF: {{media url=pdfDataUri}}`,
 });
 
 const generatePdfHighlightsFlow = ai.defineFlow(

@@ -3,8 +3,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Carte Blanche Showcase | Luxury Editorial',
-  description: 'A sophisticated showcase for documents and photography.',
+  title: 'Exhibición Carte Blanche | Editorial de Lujo',
+  description: 'Un escaparate sofisticado para documentos y fotografía.',
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

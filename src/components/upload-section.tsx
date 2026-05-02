@@ -76,8 +76,8 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       <DialogContent className="sm:max-w-[425px] bg-white border-none shadow-2xl p-0 overflow-hidden">
         <div className="bg-primary/5 p-6 border-b border-primary/10">
           <DialogHeader>
-            <DialogTitle className="font-headline text-2xl">Curation Menu</DialogTitle>
-            <p className="text-xs font-body tracking-[0.2em] uppercase text-muted-foreground pt-1">Enhance Your Collection</p>
+            <DialogTitle className="font-headline text-2xl">Menú de Curaduría</DialogTitle>
+            <p className="text-xs font-body tracking-[0.2em] uppercase text-muted-foreground pt-1">Mejore su Colección</p>
           </DialogHeader>
         </div>
         
@@ -85,15 +85,15 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
           {/* Photo Upload */}
           <section className="space-y-4">
             <h3 className="text-sm font-bold flex items-center gap-2 border-l-2 border-primary pl-3">
-              <Camera className="w-4 h-4" /> Gallery Addition
+              <Camera className="w-4 h-4" /> Adición a la Galería
             </h3>
             <div className="space-y-2">
-              <Label htmlFor="photo-upload" className="text-xs uppercase text-muted-foreground tracking-widest">Select Image</Label>
+              <Label htmlFor="photo-upload" className="text-xs uppercase text-muted-foreground tracking-widest">Seleccionar Imagen</Label>
               <Input id="photo-upload" type="file" accept="image/*" onChange={handlePhotoChange} className="cursor-pointer" />
               {photoPreview && (
                 <div className="mt-2 flex items-center justify-between p-2 border border-primary/20 bg-primary/5">
-                  <span className="text-xs truncate max-w-[200px]">Image selected</span>
-                  <Button size="sm" onClick={submitPhoto} className="h-7 text-xs">Add to Carousel</Button>
+                  <span className="text-xs truncate max-w-[200px]">Imagen seleccionada</span>
+                  <Button size="sm" onClick={submitPhoto} className="h-7 text-xs">Añadir al Carrusel</Button>
                 </div>
               )}
             </div>
@@ -102,19 +102,19 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
           {/* Card Upload */}
           <section className="space-y-4">
             <h3 className="text-sm font-bold flex items-center gap-2 border-l-2 border-primary pl-3">
-              <FileUp className="w-4 h-4" /> Editorial Card
+              <FileUp className="w-4 h-4" /> Tarjeta Editorial
             </h3>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="card-cover" className="text-xs uppercase text-muted-foreground tracking-widest">Cover Artwork</Label>
+                <Label htmlFor="card-cover" className="text-xs uppercase text-muted-foreground tracking-widest">Arte de Portada</Label>
                 <Input id="card-cover" type="file" accept="image/*" onChange={handleCardCoverChange} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="card-pdf" className="text-xs uppercase text-muted-foreground tracking-widest">PDF Document</Label>
+                <Label htmlFor="card-pdf" className="text-xs uppercase text-muted-foreground tracking-widest">Documento PDF</Label>
                 <Input id="card-pdf" type="file" accept="application/pdf" onChange={handlePdfChange} />
               </div>
               {cardCoverPreview && pdfFile && (
-                <Button onClick={submitCard} className="w-full">Create Signature Card</Button>
+                <Button onClick={submitCard} className="w-full">Crear Tarjeta de Autor</Button>
               )}
             </div>
           </section>

@@ -26,7 +26,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete }: CardPrevie
         const result = await generatePdfHighlights({ pdfDataUri });
         setHighlights(result.highlights);
       } catch (error) {
-        setHighlights("Could not generate highlights at this time.");
+        setHighlights("No se pudieron generar los puntos clave en este momento.");
       } finally {
         setIsLoading(false);
       }
@@ -47,7 +47,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete }: CardPrevie
           <div className="relative w-full h-full bg-white border border-border shadow-none overflow-hidden">
             <Image
               src={coverImage}
-              alt="Card cover"
+              alt="Portada de la tarjeta"
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -80,7 +80,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete }: CardPrevie
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-primary/10 pb-2">
               <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-              <span className="text-[10px] uppercase tracking-widest font-bold text-primary">Card Analysis</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-primary">Análisis de Tarjeta</span>
             </div>
             
             {isLoading ? (
@@ -91,7 +91,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete }: CardPrevie
               </div>
             ) : (
               <div className="text-sm font-body leading-relaxed text-muted-foreground line-clamp-[12]">
-                {highlights || "Hover to analyze document..."}
+                {highlights || "Pase el cursor para analizar el documento..."}
               </div>
             )}
           </div>

@@ -17,16 +17,16 @@ interface CardData {
 
 export default function CarteBlanchePage() {
   const [photos, setPhotos] = useState<string[]>([
-    PlaceHolderImages.find(i => i.id === 'gallery-1')?.imageUrl || '',
-    PlaceHolderImages.find(i => i.id === 'gallery-2')?.imageUrl || '',
-    PlaceHolderImages.find(i => i.id === 'gallery-3')?.imageUrl || '',
-    PlaceHolderImages.find(i => i.id === 'gallery-4')?.imageUrl || '',
+    PlaceHolderImages.find(i => i.id === 'gallery-1')?.imageUrl || 'https://picsum.photos/seed/botany1/600/800',
+    PlaceHolderImages.find(i => i.id === 'gallery-2')?.imageUrl || 'https://picsum.photos/seed/texture1/600/800',
+    PlaceHolderImages.find(i => i.id === 'gallery-3')?.imageUrl || 'https://picsum.photos/seed/floral1/600/800',
+    PlaceHolderImages.find(i => i.id === 'gallery-4')?.imageUrl || 'https://picsum.photos/seed/arch1/600/800',
   ]);
 
   const [cards, setCards] = useState<CardData[]>([]);
 
   useEffect(() => {
-    // Scroll reveal observer
+    // Observador para revelación al hacer scroll
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -61,10 +61,10 @@ export default function CarteBlanchePage() {
       <nav className="fixed top-0 left-0 w-full p-8 flex justify-between items-start z-40 mix-blend-difference pointer-events-none">
         <div className="pointer-events-auto">
           <h1 className="font-headline text-3xl text-white tracking-tighter">Carte Blanche.</h1>
-          <p className="font-body text-[10px] uppercase tracking-[0.4em] text-white/60">Editorial Collection 2025</p>
+          <p className="font-body text-[10px] uppercase tracking-[0.4em] text-white/60">Colección Editorial 2025</p>
         </div>
         <div className="vertical-label pointer-events-auto">
-          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Est. Paris / London</span>
+          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Est. París / Londres</span>
         </div>
       </nav>
 
@@ -76,18 +76,18 @@ export default function CarteBlanchePage() {
         
         <div className="relative z-10 max-w-4xl text-center space-y-12 scroll-reveal">
           <div className="space-y-4">
-            <span className="text-xs font-body tracking-[0.5em] uppercase text-primary mb-4 block">A Personal Anthology</span>
+            <span className="text-xs font-body tracking-[0.5em] uppercase text-primary mb-4 block">Una Antología Personal</span>
             <h2 className="text-7xl md:text-9xl font-headline leading-none text-foreground">
-              Timeless <br /> 
-              <span className="italic pl-12 text-primary">Moments.</span>
+              Momentos <br /> 
+              <span className="italic pl-12 text-primary">Eternos.</span>
             </h2>
           </div>
           <div className="flex justify-center">
              <div className="w-1 px-4 border-l border-primary/20 h-24" />
           </div>
           <p className="max-w-md mx-auto font-body text-muted-foreground leading-loose">
-            A curated space where photography meets documentation. 
-            An asymmetrical editorial experience designed for the sophisticated curator.
+            Un espacio curado donde la fotografía se encuentra con la documentación. 
+            Una experiencia editorial asimétrica diseñada para el curador sofisticado.
           </p>
         </div>
 
@@ -98,8 +98,8 @@ export default function CarteBlanchePage() {
       {/* Continuous Photo Carousel */}
       <section className="py-24 space-y-12">
         <div className="px-8 flex justify-between items-end max-w-7xl mx-auto scroll-reveal">
-          <h3 className="font-headline text-4xl">Visual Narratives</h3>
-          <span className="text-[10px] uppercase tracking-[0.3em] font-bold pb-2 text-primary">Infinite Motion</span>
+          <h3 className="font-headline text-4xl">Narrativas Visuales</h3>
+          <span className="text-[10px] uppercase tracking-[0.3em] font-bold pb-2 text-primary">Movimiento Infinito</span>
         </div>
         <PhotoCarousel photos={photos} />
       </section>
@@ -110,27 +110,27 @@ export default function CarteBlanchePage() {
           
           <div className="md:col-span-4 space-y-12 scroll-reveal">
             <div className="space-y-4">
-              <h3 className="font-headline text-5xl leading-tight">Document <br />Archive</h3>
+              <h3 className="font-headline text-5xl leading-tight">Archivo de <br />Documentos</h3>
               <p className="font-body text-muted-foreground leading-relaxed">
-                Experience your documents as tactile, elegant objects. Each card is an entryway 
-                to a deeper story, analyzed and revealed with precision.
+                Experimente sus documentos como objetos táctiles y elegantes. Cada tarjeta es un portal 
+                a una historia más profunda, analizada y revelada con precisión.
               </p>
             </div>
             
             <div className="p-8 border-l border-primary/20 bg-background/50 space-y-6">
               <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Interactive Preview</p>
-                <p className="text-xs italic text-muted-foreground">Hover over any card to reveal its essence.</p>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Vista Previa Interactiva</p>
+                <p className="text-xs italic text-muted-foreground">Pase el cursor sobre cualquier tarjeta para revelar su esencia.</p>
               </div>
               <Separator className="bg-primary/10" />
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-headline">{cards.length}</p>
-                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Total Cards</p>
+                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Tarjetas Totales</p>
                 </div>
                 <div>
                   <p className="text-2xl font-headline text-primary">01</p>
-                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Volume</p>
+                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Volumen</p>
                 </div>
               </div>
             </div>
@@ -139,8 +139,8 @@ export default function CarteBlanchePage() {
           <div className="md:col-span-8 scroll-reveal">
             {cards.length === 0 ? (
               <div className="h-[500px] border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-muted-foreground space-y-4">
-                <p className="font-headline text-2xl">Your archive is empty.</p>
-                <p className="text-xs uppercase tracking-[0.2em]">Curate your first card below</p>
+                <p className="font-headline text-2xl">Su archivo está vacío.</p>
+                <p className="text-xs uppercase tracking-[0.2em]">Cree su primera tarjeta debajo</p>
               </div>
             ) : (
               <Carousel 
@@ -175,19 +175,19 @@ export default function CarteBlanchePage() {
           <div className="space-y-6">
             <h4 className="font-headline text-3xl text-white">Carte Blanche.</h4>
             <p className="text-xs leading-loose font-light">
-              Designing the future of editorial archiving. Every piece uploaded is a step towards a more beautiful history.
+              Diseñando el futuro del archivo editorial. Cada pieza cargada es un paso hacia una historia más hermosa.
             </p>
           </div>
           <div className="space-y-6">
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Philosophy</p>
+            <p className="text-[10px] uppercase tracking-widest text-white/40">Filosofía</p>
             <ul className="space-y-2 text-xs">
-              <li className="hover:text-primary transition-colors cursor-pointer">The Art of Curating</li>
-              <li className="hover:text-primary transition-colors cursor-pointer">Digital Editorial Standards</li>
-              <li className="hover:text-primary transition-colors cursor-pointer">Timeless Aesthetics</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">El Arte de Curar</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Estándares Editoriales Digitales</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Estética Atemporal</li>
             </ul>
           </div>
           <div className="space-y-6 text-right md:text-left">
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Contact</p>
+            <p className="text-[10px] uppercase tracking-widest text-white/40">Contacto</p>
             <p className="text-xs italic">info@carteblanche.studio</p>
             <div className="flex gap-4 pt-4 md:justify-start justify-end">
               <div className="w-8 h-px bg-white/20" />
