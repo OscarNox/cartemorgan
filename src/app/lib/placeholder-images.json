@@ -1,0 +1,35 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Elegant wedding table setting",
+      "imageUrl": "https://picsum.photos/seed/wedding1/1200/800",
+      "imageHint": "wedding table"
+    },
+    {
+      "id": "gallery-1",
+      "description": "Botanical detail",
+      "imageUrl": "https://picsum.photos/seed/botany1/600/800",
+      "imageHint": "botanical plant"
+    },
+    {
+      "id": "gallery-2",
+      "description": "Luxury texture",
+      "imageUrl": "https://picsum.photos/seed/texture1/600/800",
+      "imageHint": "silk texture"
+    },
+    {
+      "id": "gallery-3",
+      "description": "Soft floral arrangement",
+      "imageUrl": "https://picsum.photos/seed/floral1/600/800",
+      "imageHint": "floral bouquet"
+    },
+    {
+      "id": "gallery-4",
+      "description": "Elegant architectural detail",
+      "imageUrl": "https://picsum.photos/seed/arch1/600/800",
+      "imageHint": "luxury architecture"
+    }
+  ]
+}
