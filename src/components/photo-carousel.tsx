@@ -9,8 +9,21 @@ interface PhotoCarouselProps {
 }
 
 export function PhotoCarousel({ photos }: PhotoCarouselProps) {
-  // Triple the items to ensure seamless loop
-  const displayPhotos = [...photos, ...photos, ...photos];
+  if (photos.length === 0) {
+    return (
+      <div className="h-64 flex flex-col items-center justify-center border-y border-primary/10 bg-white/30 space-y-4">
+        <p className="text-[10px] uppercase tracking-[0.4em] text-primary/60 font-bold">
+          Archivo Visual Vacío
+        </p>
+        <p className="text-xs font-body italic text-muted-foreground">
+          Usa el botón (+) para añadir tus momentos a esta antología.
+        </p>
+      </div>
+    );
+  }
+
+  // Multiply items to ensure seamless loop if there are enough photos
+  const displayPhotos = photos.length > 5 ? [...photos, ...photos] : [...photos, ...photos, ...photos, ...photos];
 
   return (
     <div className="relative w-full overflow-hidden bg-white/50 py-12">

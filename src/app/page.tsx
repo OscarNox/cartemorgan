@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import { PhotoCarousel } from '@/components/photo-carousel';
 import { CardPreview } from '@/components/card-preview';
 import { UploadSection } from '@/components/upload-section';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
 import { db } from '@/lib/firebase';
@@ -35,17 +34,7 @@ export default function CarteBlanchePage() {
     const qPhotos = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
     const unsubscribePhotos = onSnapshot(qPhotos, (snapshot) => {
       const fetchedPhotos = snapshot.docs.map(doc => (doc.data() as PhotoData).url);
-      
-      if (fetchedPhotos.length === 0) {
-        setPhotos([
-          PlaceHolderImages.find(i => i.id === 'gallery-1')?.imageUrl || '',
-          PlaceHolderImages.find(i => i.id === 'gallery-2')?.imageUrl || '',
-          PlaceHolderImages.find(i => i.id === 'gallery-3')?.imageUrl || '',
-          PlaceHolderImages.find(i => i.id === 'gallery-4')?.imageUrl || '',
-        ]);
-      } else {
-        setPhotos(fetchedPhotos);
-      }
+      setPhotos(fetchedPhotos);
     });
 
     const qCards = query(collection(db, 'cards'), orderBy('createdAt', 'desc'));
