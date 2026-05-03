@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -31,7 +30,7 @@ export default function CarteBlanchePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Escuchar cambios en la colección de fotos en tiempo real con ordenamiento
+    // Escucha en tiempo real de la colección de fotos
     const qPhotos = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
     const unsubscribePhotos = onSnapshot(qPhotos, (snapshot) => {
       const fetchedPhotos = snapshot.docs.map(doc => ({
@@ -41,7 +40,7 @@ export default function CarteBlanchePage() {
       setPhotos(fetchedPhotos);
     });
 
-    // Escuchar cambios en la colección de cartas en tiempo real con ordenamiento
+    // Escucha en tiempo real de la colección de cartas
     const qCards = query(collection(db, 'cards'), orderBy('createdAt', 'desc'));
     const unsubscribeCards = onSnapshot(qCards, (snapshot) => {
       const fetchedCards = snapshot.docs.map(doc => ({
@@ -58,7 +57,6 @@ export default function CarteBlanchePage() {
     };
   }, []);
 
-  // Animaciones de scroll reveal mejoradas
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -87,15 +85,14 @@ export default function CarteBlanchePage() {
       toast({
         variant: "destructive",
         title: "Error de Conexión",
-        description: "No se pudo guardar la imagen en la base de datos."
+        description: "No se pudo guardar la imagen. Revisa tu configuración de Firebase."
       });
     }
   };
   
   const addCard = async (cover: string, pdf: string) => {
     try {
-      // Validación estricta de tamaño para Firestore (límite de 1MB por documento)
-      // Usamos un margen de seguridad (aprox 800KB)
+      // Límite de seguridad para Firestore (1MB por documento)
       if (pdf.length > 850000) {
         toast({
           variant: "destructive",
@@ -143,7 +140,6 @@ export default function CarteBlanchePage() {
   return (
     <div className="min-h-screen botanical-pattern relative overflow-hidden selection:bg-primary/20">
       
-      {/* Navegación Fija */}
       <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-40 mix-blend-difference pointer-events-none">
         <div className="pointer-events-auto">
           <h1 className="font-headline text-2xl md:text-3xl text-white tracking-tighter">Carte Morgan.</h1>
@@ -154,7 +150,6 @@ export default function CarteBlanchePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-6 py-20 bg-white overflow-hidden">
         <div className="absolute inset-0 opacity-5">
           <div className="w-full h-full botanical-pattern" />
@@ -178,7 +173,6 @@ export default function CarteBlanchePage() {
         </div>
       </section>
 
-      {/* Galería Visual Real */}
       <section className="py-16 md:py-24 space-y-8 md:space-y-12 bg-background/50 backdrop-blur-sm">
         <div className="px-6 md:px-8 flex flex-col md:flex-row justify-between items-start md:items-end max-w-7xl mx-auto scroll-reveal gap-4">
           <div>
@@ -190,7 +184,6 @@ export default function CarteBlanchePage() {
         <PhotoCarousel photos={photos.map(p => p.url)} />
       </section>
 
-      {/* Archivo de Cartas */}
       <section className="py-20 md:py-32 bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-24">
           
@@ -232,7 +225,7 @@ export default function CarteBlanchePage() {
                 <p className="font-headline text-2xl">El archivo está listo</p>
                 <p className="text-[10px] uppercase tracking-[0.2em] leading-loose">
                   Tu historia comienza con la primera carga. <br />
-                  Usa el botón flotante para añadir un nuevo recuerdo a la base de datos.
+                  Usa el botón flotante para añadir un nuevo recuerdo.
                 </p>
               </div>
             ) : (
@@ -262,7 +255,6 @@ export default function CarteBlanchePage() {
         </div>
       </section>
 
-      {/* Pie de Página */}
       <footer className="py-20 bg-foreground text-white/80">
         <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-16">
           <div className="space-y-6">
@@ -283,7 +275,7 @@ export default function CarteBlanchePage() {
             <p className="text-[10px] uppercase tracking-widest text-white/40">Estado del Sistema</p>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <p className="text-xs italic">Base de datos en tiempo real activa.</p>
+              <p className="text-xs italic">Base de datos activa.</p>
             </div>
           </div>
         </div>

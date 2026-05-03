@@ -1,58 +1,44 @@
+# Carte Morgan - Guía de Configuración de Base de Datos
 
-# Carte Blanche - Guía de Configuración, Uso y Despliegue
+Este proyecto utiliza **Firebase Firestore** para la persistencia de datos en tiempo real. Sigue estos pasos para que tu base de datos funcione "para siempre".
 
-Este proyecto es una aplicación de Next.js diseñada como una antología editorial de lujo, potenciada por IA (Genkit) y almacenamiento en tiempo real (Firebase Firestore).
+## 1. Crear Proyecto en Firebase
+1. Ve a [Firebase Console](https://console.firebase.google.com/).
+2. Crea un nuevo proyecto llamado `Carte Morgan`.
+3. En el menú lateral, ve a **Firestore Database** y haz clic en "Crear base de datos".
+4. Elige una ubicación cercana y comienza en **Modo de prueba** (esto permite leer/escribir sin reglas complejas al principio).
 
-## 🚀 Características Principales
-- **IA de Análisis**: Utiliza **Genkit** con **Gemini 2.5 Flash** para extraer la esencia emocional de tus cartas.
-- **Base de Datos Real**: Integración completa con **Firebase Firestore** para persistencia total de fotos y documentos.
-- **Responsive Design**: Interfaz optimizada para móviles, tablets y escritorio con resolución retina.
-- **Vista Previa Original**: Lector de PDF integrado para revisar tus documentos digitalizados.
+## 2. Configurar Colecciones
+La aplicación creará las colecciones automáticamente al subir el primer archivo, pero puedes crearlas manualmente si prefieres:
+- `photos`: Documentos con campo `url` (string) y `createdAt` (timestamp).
+- `cards`: Documentos con campos `coverImage` (string), `pdfDataUri` (string) y `createdAt` (timestamp).
 
-## 💻 Configuración para VS Code
+## 3. Obtener Credenciales
+1. Ve a la rueda dentada (Configuración del proyecto) > Configuración del proyecto.
+2. En la sección "Tus apps", añade una nueva **App Web** (icono `</>`).
+3. Copia el objeto `firebaseConfig`.
 
-### 1. Requisitos Previos
-- Tener instalado [Node.js](https://nodejs.org/) (versión 18 o superior).
-- Una cuenta en [Firebase Console](https://console.firebase.google.com/).
-- Una API Key de [Google AI Studio](https://aistudio.google.com/).
+## 4. Configurar Variables de Entorno en VS Code
+Crea un archivo `.env.local` en la raíz de tu proyecto y pega tus datos:
 
-### 2. Pasos de Instalación
-1. Descarga y abre el proyecto en VS Code.
-2. En la terminal, instala las dependencias:
-   ```bash
-   npm install
-   ```
-3. Crea un archivo `.env.local` en la raíz del proyecto y añade tus credenciales:
-   ```env
-   # Genkit / AI
-   GOOGLE_GENAI_API_KEY=tu_clave_de_gemini
+```env
+# Clave de Inteligencia Artificial (Google AI Studio)
+GOOGLE_GENAI_API_KEY=tu_clave_de_gemini
 
-   # Firebase (Cópialas de la configuración de tu App Web en Firebase)
-   NEXT_PUBLIC_FIREBASE_API_KEY=...
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
-   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
-   NEXT_PUBLIC_FIREBASE_APP_ID=...
-   ```
+# Credenciales de Firebase
+NEXT_PUBLIC_FIREBASE_API_KEY=tu_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu_proyecto_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=tu_app_id
+```
 
-### 3. Configurar Firebase Firestore
-1. Ve a tu proyecto en la consola de Firebase.
-2. Ve a **Firestore Database** y haz clic en "Crear base de datos".
-3. Elige la ubicación más cercana y comienza en **Modo de prueba** (para desarrollo) o configura las reglas de seguridad.
-4. Crea dos colecciones vacías: `photos` y `cards`.
-
-### 4. Ejecutar el Proyecto
+## 5. Ejecución
+Instala las dependencias y lanza el proyecto:
 ```bash
+npm install
 npm run dev
 ```
 
-## 🌐 Despliegue en la Web (Netlify)
-1. Sube tu código a un repositorio en **GitHub**.
-2. Conecta tu repositorio en **Netlify**.
-3. **IMPORTANTE**: Ve a "Site Settings" > "Environment Variables" en Netlify y añade todas las variables de tu `.env.local`.
-4. Netlify generará una URL gratuita (ej. `nuestra-historia.netlify.app`).
-
-## ⚠️ Notas Técnicas Importantes
-- **Límite de Documentos**: Firestore tiene un límite de 1MB por documento. La aplicación tiene una validación integrada para evitar que subas PDFs demasiado pesados (máximo recomendado ~850KB).
-- **Sincronización**: Gracias a `onSnapshot`, si abres la app en dos teléfonos distintos, verás cómo se actualizan las fotos al mismo tiempo.
+Tus recuerdos ahora se guardarán permanentemente en la nube de Google.
