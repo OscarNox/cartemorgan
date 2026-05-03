@@ -1,22 +1,22 @@
 
-# Carte Blanche - Guía de Configuración y Despliegue
+# Carte Blanche - Guía de Configuración, Uso y Despliegue
 
-Este proyecto es una aplicación de Next.js con IA (Genkit) y base de datos (Firebase Firestore).
+Este proyecto es una aplicación de Next.js diseñada como una antología editorial de lujo, potenciada por IA (Genkit) y almacenamiento en tiempo real (Firebase Firestore).
 
-## 1. ¿Cómo funciona?
-- **IA de Análisis**: Usa **Genkit** con **Gemini 2.5 Flash** para resumir PDFs.
-- **Base de Datos**: Usa **Firebase Firestore** para guardar fotos y cartas permanentemente.
-- **Coste $0**: Puedes desplegar esto gratis en Netlify con un subdominio gratuito.
+## 🚀 ¿Cómo funciona?
+- **IA de Análisis**: Utiliza **Genkit** con **Gemini 2.5 Flash** para extraer puntos clave de documentos PDF.
+- **Base de Datos**: Usa **Firebase Firestore** para guardar fotos y cartas de manera permanente.
+- **Diseño**: Interfaz minimalista y elegante basada en **ShadCN UI** y **Tailwind CSS**.
 
-## 2. Configuración en VS Code (Local)
-1. Descarga el ZIP y ábrelo en VS Code.
-2. Instala las librerías:
+## 💻 Configuración en VS Code (Local)
+1. **Descarga**: Exporta el proyecto como un archivo ZIP y ábrelo en VS Code.
+2. **Instalación**: Abre la terminal y ejecuta:
    ```bash
    npm install
    ```
-3. Crea un archivo `.env.local` en la raíz y añade tus llaves:
+3. **Variables de Entorno**: Crea un archivo `.env.local` en la raíz con tus credenciales:
    ```env
-   GOOGLE_GENAI_API_KEY=tu_clave_gemini
+   GOOGLE_GENAI_API_KEY=tu_clave_de_google_ai
    NEXT_PUBLIC_FIREBASE_API_KEY=...
    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
    NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
@@ -24,15 +24,27 @@ Este proyecto es una aplicación de Next.js con IA (Genkit) y base de datos (Fir
    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
    NEXT_PUBLIC_FIREBASE_APP_ID=...
    ```
+4. **Ejecutar**:
+   ```bash
+   npm run dev
+   ```
 
-## 3. Despliegue GRATIS (Netlify)
-No necesitas comprar un dominio. Sigue estos pasos:
-1. Sube tu carpeta a un repositorio de **GitHub**.
-2. Entra en [Netlify](https://www.netlify.com/) y dale a "Add new site" > "Import from git".
-3. Selecciona tu repositorio.
-4. **IMPORTANTE**: Ve a "Site Settings" > "Environment Variables" y añade todas las variables de tu `.env.local`.
-5. Netlify te dará una URL como `https://nombre-al azar.netlify.app`. ¡Esa es tu dirección pública!
+## 🌐 Cómo Publicar (Despliegue)
+Para que otros puedan ver tu aplicación en la web, tienes dos opciones principales:
 
-## 4. Comandos Útiles
-- `npm run dev`: Probar en tu computadora (localhost:9002).
-- `npm run build`: Preparar la app para subirla a internet.
+### Opción A: Firebase App Hosting (Recomendado)
+Este proyecto ya incluye `apphosting.yaml`. 
+1. Sube tu código a un repositorio en **GitHub**.
+2. Ve a la [Consola de Firebase](https://console.firebase.google.com/).
+3. Selecciona "App Hosting" y conecta tu repositorio de GitHub.
+4. Firebase te dará una URL pública automáticamente.
+
+### Opción B: Netlify (Rápido y Gratis)
+1. Sube tu carpeta a **GitHub**.
+2. Entra en [Netlify](https://www.netlify.com/) y selecciona "Import from git".
+3. **IMPORTANTE**: En "Site Settings" > "Environment Variables", añade todas las variables de tu `.env.local`.
+4. Netlify generará una URL gratuita tipo `https://tu-nombre.netlify.app`.
+
+## ⚠️ Notas Técnicas
+- **Límite de Tamaño**: Firestore tiene un límite de 1MB por documento. Asegúrate de que los archivos PDF que subas no sean extremadamente pesados (idealmente < 800KB).
+- **Persistencia**: Gracias a Firebase, todo lo que subas desde cualquier lugar se verá reflejado en tiempo real en todos los dispositivos que abran la página.

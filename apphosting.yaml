@@ -1,7 +1,14 @@
-# Settings to manage and configure a Firebase App Hosting backend.
+
+# Configuración para Firebase App Hosting
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
-  maxInstances: 1
+  maxInstances: 2
+  minInstances: 0
+  memory: 512MiB
+
+env:
+  - variable: GOOGLE_GENAI_API_KEY
+    availability:
+      - RUNTIME
+      - BUILD
