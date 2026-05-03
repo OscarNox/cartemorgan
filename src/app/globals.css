@@ -5,7 +5,6 @@
 
 @layer base {
   :root {
-    /* Ethereal Whisper Background: #FCF7FA */
     --background: 330 25% 98.5%;
     --foreground: 330 20% 15%;
     
@@ -15,18 +14,15 @@
     --popover: 0 0% 100%;
     --popover-foreground: 330 20% 15%;
     
-    /* Elegant Mauve / Dusty Rose: #C1839F / #C5A1A1 */
     --primary: 332 33% 64%;
     --primary-foreground: 0 0% 100%;
     
-    /* Soft Taupe: #A89B91 */
     --secondary: 25 11% 62%;
     --secondary-foreground: 0 0% 100%;
     
     --muted: 330 10% 92%;
     --muted-foreground: 330 5% 45%;
     
-    /* Soft Lavender: #D6A9C8 */
     --accent: 317 24% 72%;
     --accent-foreground: 330 20% 15%;
     
@@ -37,7 +33,7 @@
     --input: 330 15% 90%;
     --ring: 332 33% 64%;
     
-    --radius: 0rem; /* Editorial style uses zero radius as per design spec */
+    --radius: 0rem;
   }
 }
 
@@ -46,7 +42,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground font-body overflow-x-hidden;
+    -webkit-tap-highlight-color: transparent;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline;
@@ -74,23 +71,48 @@
   text-orientation: mixed;
 }
 
-.masonry-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-auto-rows: 20px;
-}
-
 .botanical-pattern {
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10 Q 30 10 30 30 T 50 50' fill='none' stroke='%23C5A1A1' stroke-width='0.5' opacity='0.2'/%3E%3C/svg%3E");
 }
 
 .scroll-reveal {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(20px);
   transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .scroll-reveal.active {
   opacity: 1;
   transform: translateY(0);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-primary/20 rounded-full;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (max-width: 768px) {
+  .animate-marquee {
+    animation-duration: 30s;
+  }
 }
