@@ -136,7 +136,7 @@ export default function CarteBlanchePage() {
       <nav className="fixed top-0 left-0 w-full p-4 md:p-8 flex justify-between items-start z-40 mix-blend-difference pointer-events-none">
         <div className="pointer-events-auto">
           <h1 className="font-headline text-2xl md:text-3xl text-white tracking-tighter">Carte Morgan.</h1>
-          <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/60">2024 hasta siempre.</p>
+          <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/60">2024 to end.</p>
         </div>
         <div className="vertical-label pointer-events-auto hidden sm:block">
           <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Est. Cotuí / Rep. Dom.</span>
@@ -173,8 +173,8 @@ export default function CarteBlanchePage() {
       {/* Galería Visual */}
       <section className="py-16 md:py-24 space-y-8 md:space-y-12">
         <div className="px-6 md:px-8 flex flex-col md:flex-row justify-between items-start md:items-end max-w-7xl mx-auto scroll-reveal gap-4">
-          <h3 className="font-headline text-3xl md:text-4xl">Historias Visuales</h3>
-          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-primary">La esencia de cada día</span>
+          <h3 className="font-headline text-3xl md:text-4xl">Nuestras Historias</h3>
+          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-primary">Nuestra esencia</span>
         </div>
         <PhotoCarousel photos={photos} />
       </section>
@@ -187,16 +187,16 @@ export default function CarteBlanchePage() {
             <div className="space-y-4">
               <h3 className="font-headline text-4xl md:text-5xl leading-tight">Baúl de <br className="hidden md:block" />Suspiros</h3>
               <p className="font-body text-sm md:text-base text-muted-foreground leading-relaxed">
-                Cada sentimiento, cada pensamiento y cada suspiro tiene su lugar aquí. 
-                Es importante dar valor a lo que amamos, por eso he creado este archivo para que 
-                nuestra historia sea eterna.
+                Cada sentimiento, cada pensamiento y cada suspiro que tenemos es parte de lo que sentimos y amamos. 
+                Es importante dar valor a lo que amamos, por eso para que 
+                nuestra historia sea eterna tenemos que apreciarla.
               </p>
             </div>
             
             <div className="p-6 md:p-8 border-l border-primary/20 bg-background/50 space-y-6">
               <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Tu legado emocional.</p>
-                <p className="text-[11px] italic text-muted-foreground">Sentimientos y deseos guardados.</p>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Nuestros Suspiros</p>
+                <p className="text-[11px] italic text-muted-foreground">Sentimientos, pensamientos y deseos guardados.</p>
               </div>
               <Separator className="bg-primary/10" />
               <div className="grid grid-cols-2 gap-4 text-center">
@@ -206,7 +206,7 @@ export default function CarteBlanchePage() {
                 </div>
                 <div>
                   <p className="text-xl md:text-2xl font-headline text-primary">∞</p>
-                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Infinitos</p>
+                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Infinitas</p>
                 </div>
               </div>
             </div>
@@ -255,29 +255,27 @@ export default function CarteBlanchePage() {
           <div className="space-y-6">
             <h4 className="font-headline text-2xl md:text-3xl text-white">Carte Morgan.</h4>
             <p className="text-[11px] md:text-xs leading-loose font-light max-w-xs">
-              Siempre que queramos dar un vistazo hacia atrás, aquí estaré, siempre presente en cada recuerdo.
+              Siempre que queramos dar un vistazo hacia atrás, aquí estaré, siempre...
             </p>
           </div>
           <div className="space-y-6">
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Nuestra Promesa</p>
+            <p className="text-[10px] uppercase tracking-widest text-white/40">Conversaciones necesarias.</p>
             <ul className="space-y-3 text-[11px] md:text-xs">
-              <li className="hover:text-primary transition-colors cursor-pointer border-b border-white/5 pb-1">Hecho con amor absoluto</li>
-              <li className="hover:text-primary transition-colors cursor-pointer border-b border-white/5 pb-1">Deseos del corazón</li>
-              <li className="hover:text-primary transition-colors cursor-pointer border-b border-white/5 pb-1">Lo que realmente importa</li>
+            <li className="hover:text-primary transition-colors cursor-pointer">Querer hacer las cosas bien.</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">¿Que es lo que amas?.</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Lo que buscamos.</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">¿Esto es lo que siempre quise?</li>
             </ul>
           </div>
           <div className="space-y-6 flex flex-col items-center md:items-start">
             <p className="text-[10px] uppercase tracking-widest text-white/40">Siempre tuyo</p>
-            <p className="text-xs italic text-center md:text-left">Un lugar para volver cuando necesites sentir mi corazón.</p>
+            <p className="text-xs italic text-center md:text-left">Estare contigo cuando necesites sentir mi corazón.</p>
             <div className="flex gap-4 pt-4">
               <div className="w-8 h-px bg-white/20" />
               <div className="w-8 h-px bg-primary" />
               <div className="w-8 h-px bg-white/20" />
             </div>
           </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-8 mt-16 pt-8 border-t border-white/5 text-center">
-          <p className="text-[8px] uppercase tracking-[0.5em] text-white/20">Edición Privada © 2024</p>
         </div>
       </footer>
 
