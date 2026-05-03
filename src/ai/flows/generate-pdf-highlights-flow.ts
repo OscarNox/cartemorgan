@@ -1,11 +1,9 @@
 
 'use server';
 /**
- * @fileOverview Un flujo de Genkit que resume los puntos clave de un documento PDF en español.
+ * @fileOverview Un flujo de Genkit especializado en síntesis editorial de cartas personales.
  *
- * - generatePdfHighlights - Una función para generar puntos clave desde un PDF.
- * - GeneratePdfHighlightsInput - El tipo de entrada para la función.
- * - GeneratePdfHighlightsOutput - El tipo de salida para la función.
+ * - generatePdfHighlights - Extrae la esencia emocional y puntos clave de un PDF.
  */
 
 import {ai} from '@/ai/genkit';
@@ -15,13 +13,13 @@ const GeneratePdfHighlightsInputSchema = z.object({
   pdfDataUri: z
     .string()
     .describe(
-      "El contenido del documento PDF como un data URI codificado en Base64. Formato esperado: 'data:<mimetype>;base64,<encoded_data>'."
+      "El contenido del documento PDF como un data URI codificado en Base64."
     ),
 });
 export type GeneratePdfHighlightsInput = z.infer<typeof GeneratePdfHighlightsInputSchema>;
 
 const GeneratePdfHighlightsOutputSchema = z.object({
-  highlights: z.string().describe("Un resumen conciso de los puntos clave del PDF en español."),
+  highlights: z.string().describe("Un resumen poético y editorial de la carta, SIEMPRE en español."),
 });
 export type GeneratePdfHighlightsOutput = z.infer<typeof GeneratePdfHighlightsOutputSchema>;
 
@@ -33,8 +31,15 @@ const prompt = ai.definePrompt({
   name: 'generatePdfHighlightsPrompt',
   input: {schema: GeneratePdfHighlightsInputSchema},
   output: {schema: GeneratePdfHighlightsOutputSchema},
-  prompt: `Eres un experto en síntesis editorial. Tu tarea es analizar el documento PDF proporcionado y extraer sus puntos más importantes.
-Presenta los puntos clave como un resumen conciso y elegante, SIEMPRE en idioma ESPAÑOL.
+  prompt: `Eres un curador editorial y experto en análisis de correspondencia romántica y personal. 
+Tu tarea es leer el documento PDF proporcionado y extraer su "esencia emocional".
+
+REGLAS CRUCIALES:
+1. El tono debe ser elegante, poético y respetuoso (estilo editorial de lujo).
+2. Debes sintetizar los sentimientos, promesas o momentos clave mencionados.
+3. El resultado debe ser un párrafo fluido, sin listas, que capture el corazón del mensaje.
+4. SIEMPRE responde en ESPAÑOL.
+5. Si el documento es muy corto, expande un poco la interpretación poética de lo escrito.
 
 Documento PDF: {{media url=pdfDataUri}}`,
 });
