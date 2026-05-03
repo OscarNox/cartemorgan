@@ -1,31 +1,38 @@
+
 # Carte Blanche - Guía de Configuración Local y Despliegue
 
-Este proyecto es una aplicación de Next.js de alta gama con integración de IA (Genkit) y Firebase. Sigue esta guía para configurarlo en tu entorno local (VS Code) y desplegarlo.
+Este proyecto es una aplicación de Next.js de alta gama con integración de IA (Genkit) y base de datos persistente (Firebase Firestore).
 
-## 1. Funcionamiento Técnico (Cómo trabaja la App)
+## 1. Funcionamiento Técnico
 
-- **IA de Análisis**: La app usa **Genkit** con el modelo **Gemini 2.5 Flash**. Cuando subes un PDF, la IA lo procesa en el servidor y extrae puntos clave.
-- **Estado de los Datos**: Actualmente, la app utiliza **Estado Local (React useState)**. 
-  - *¿Qué significa?* Que los datos son volátiles. Si recargas la página, las tarjetas nuevas se borrarán.
-- **Base de Datos**: El proyecto incluye el SDK de **Firebase**, pero no está conectado a una base de datos activa por defecto para facilitar el prototipado rápido. Para guardar datos permanentemente, deberás configurar **Firestore**.
+- **IA de Análisis**: Usa **Genkit** con **Gemini 2.5 Flash** para resumir PDFs en español.
+- **Base de Datos**: Integración con **Firebase Firestore** para guardar fotos y cartas permanentemente.
+- **Seguridad de Datos**: Los documentos se almacenan como Data URIs (Base64) en Firestore. Nota: Firestore tiene un límite de 1MB por documento. Para PDFs muy grandes, se recomienda integrar Firebase Storage en el futuro.
 
 ## 2. Configuración en VS Code
 
-1. **Descarga el Proyecto**: Extrae el archivo ZIP en una carpeta.
-2. **Abre la Carpeta**: En VS Code, ve a `Archivo > Abrir Carpeta`.
-3. **Instala las Dependencias**:
-   Abre la terminal (`Ctrl + ñ`) y ejecuta:
+1. **Descarga el Proyecto**: Extrae el archivo ZIP.
+2. **Instala las Dependencias**:
    ```bash
    npm install
    ```
 
-## 3. Variables de Entorno (OBLIGATORIO)
+## 3. Variables de Entorno (.env.local)
 
-Crea un archivo `.env.local` en la raíz y añade tu clave:
+Crea un archivo `.env.local` en la raíz con lo siguiente:
+
 ```env
-GOOGLE_GENAI_API_KEY=tu_clave_aqui
+# Google AI
+GOOGLE_GENAI_API_KEY=tu_clave_de_gemini
+
+# Firebase Configuration (Obtenlas en console.firebase.google.com)
+NEXT_PUBLIC_FIREBASE_API_KEY=tu_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu_proyecto_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=tu_app_id
 ```
-*Obtén tu clave en [Google AI Studio](https://aistudio.google.com/).*
 
 ## 4. Comandos de Ejecución
 
@@ -33,15 +40,13 @@ GOOGLE_GENAI_API_KEY=tu_clave_aqui
   ```bash
   npm run dev
   ```
-  Abre [http://localhost:9002](http://localhost:9002).
 
-## 5. Cómo Subir a Netlify
+## 5. Cómo Desplegar en Netlify
 
-1. **GitHub**: Sube tu código a un repositorio.
-2. **Netlify**:
-   - Conecta tu repositorio.
-   - **IMPORTANTE**: En `Site Settings > Environment Variables`, añade la variable `GOOGLE_GENAI_API_KEY`.
-3. **Despliegue**: El archivo `netlify.toml` ya está configurado para que todo funcione automáticamente.
+1. Sube tu código a GitHub.
+2. Conecta el repo en Netlify.
+3. Añade TODAS las variables de entorno de arriba en `Site Settings > Environment Variables`.
+4. El archivo `netlify.toml` ya está configurado para el despliegue automático.
 
 ---
-*Nota: Esta aplicación es un prototipo editorial de alta fidelidad. Los archivos PDF se procesan como Data URIs para mantener la simplicidad del servidor.*
+*Nota: Asegúrate de habilitar "Cloud Firestore" en tu consola de Firebase y configurar las reglas de seguridad en "Test Mode" para el desarrollo inicial.*

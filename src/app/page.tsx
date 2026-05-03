@@ -8,25 +8,66 @@ import { UploadSection } from '@/components/upload-section';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 interface CardData {
   id: string;
   coverImage: string;
   pdfDataUri: string;
+  createdAt: any;
+}
+
+interface PhotoData {
+  id: string;
+  url: string;
+  createdAt: any;
 }
 
 export default function CarteBlanchePage() {
-  const [photos, setPhotos] = useState<string[]>([
-    PlaceHolderImages.find(i => i.id === 'gallery-1')?.imageUrl || 'https://picsum.photos/seed/botany1/600/800',
-    PlaceHolderImages.find(i => i.id === 'gallery-2')?.imageUrl || 'https://picsum.photos/seed/texture1/600/800',
-    PlaceHolderImages.find(i => i.id === 'gallery-3')?.imageUrl || 'https://picsum.photos/seed/floral1/600/800',
-    PlaceHolderImages.find(i => i.id === 'gallery-4')?.imageUrl || 'https://picsum.photos/seed/arch1/600/800',
-  ]);
-
+  const { toast } = useToast();
+  const [photos, setPhotos] = useState<string[]>([]);
   const [cards, setCards] = useState<CardData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Observador para revelación al hacer scroll
+    // Sincronización de Fotos en tiempo real
+    const qPhotos = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
+    const unsubscribePhotos = onSnapshot(qPhotos, (snapshot) => {
+      const fetchedPhotos = snapshot.docs.map(doc => (doc.data() as PhotoData).url);
+      
+      // Si no hay fotos en la DB, mostramos las de marcador de posición
+      if (fetchedPhotos.length === 0) {
+        setPhotos([
+          PlaceHolderImages.find(i => i.id === 'gallery-1')?.imageUrl || '',
+          PlaceHolderImages.find(i => i.id === 'gallery-2')?.imageUrl || '',
+          PlaceHolderImages.find(i => i.id === 'gallery-3')?.imageUrl || '',
+          PlaceHolderImages.find(i => i.id === 'gallery-4')?.imageUrl || '',
+        ]);
+      } else {
+        setPhotos(fetchedPhotos);
+      }
+    });
+
+    // Sincronización de Cartas en tiempo real
+    const qCards = query(collection(db, 'cards'), orderBy('createdAt', 'desc'));
+    const unsubscribeCards = onSnapshot(qCards, (snapshot) => {
+      const fetchedCards = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as CardData[];
+      setCards(fetchedCards);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribePhotos();
+      unsubscribeCards();
+    };
+  }, []);
+
+  useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -39,25 +80,64 @@ export default function CarteBlanchePage() {
     return () => observer.disconnect();
   }, [cards, photos]);
 
-  const addPhoto = (url: string) => setPhotos(prev => [...prev, url]);
+  const addPhoto = async (url: string) => {
+    try {
+      await addDoc(collection(db, 'photos'), {
+        url,
+        createdAt: new Date()
+      });
+      toast({
+        title: "Imagen Añadida",
+        description: "Tu fotografía ha sido guardada en la galería."
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo guardar la imagen en la base de datos."
+      });
+    }
+  };
   
-  const addCard = (cover: string, pdf: string) => {
-    const newCard: CardData = {
-      id: Math.random().toString(36).substr(2, 9),
-      coverImage: cover,
-      pdfDataUri: pdf
-    };
-    setCards(prev => [...prev, newCard]);
+  const addCard = async (cover: string, pdf: string) => {
+    try {
+      await addDoc(collection(db, 'cards'), {
+        coverImage: cover,
+        pdfDataUri: pdf,
+        createdAt: new Date()
+      });
+      toast({
+        title: "Carta Creada",
+        description: "El nuevo suspiro ha sido archivado correctamente."
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error de Guardado",
+        description: "El archivo es demasiado grande o hubo un problema de conexión."
+      });
+    }
   };
 
-  const deleteCard = (id: string) => {
-    setCards(prev => prev.filter(card => card.id !== id));
+  const deleteCard = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'cards', id));
+      toast({
+        title: "Carta Eliminada",
+        description: "El registro ha sido removido del archivo."
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo eliminar la carta."
+      });
+    }
   };
 
   return (
     <div className="min-h-screen botanical-pattern relative overflow-hidden">
       
-      {/* Editorial Navigation Overlay */}
       <nav className="fixed top-0 left-0 w-full p-8 flex justify-between items-start z-40 mix-blend-difference pointer-events-none">
         <div className="pointer-events-auto">
           <h1 className="font-headline text-3xl text-white tracking-tighter">Carte Morgan.</h1>
@@ -68,7 +148,6 @@ export default function CarteBlanchePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center p-8 bg-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="w-full h-full botanical-pattern" />
@@ -93,11 +172,9 @@ export default function CarteBlanchePage() {
           </p>
         </div>
 
-        {/* Floating Abstract Element */}
         <div className="absolute bottom-20 right-20 w-64 h-96 bg-accent/10 -z-0 translate-x-12 translate-y-12" />
       </section>
 
-      {/* Continuous Photo Carousel */}
       <section className="py-24 space-y-12">
         <div className="px-8 flex justify-between items-end max-w-7xl mx-auto scroll-reveal">
           <h3 className="font-headline text-4xl">Nuestras Historias</h3>
@@ -106,7 +183,6 @@ export default function CarteBlanchePage() {
         <PhotoCarousel photos={photos} />
       </section>
 
-      {/* Card Collection Section */}
       <section className="py-32 bg-white/40 backdrop-blur-sm min-h-screen">
         <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-12 gap-12">
           
@@ -140,14 +216,18 @@ export default function CarteBlanchePage() {
           </div>
 
           <div className="md:col-span-8 scroll-reveal">
-            {cards.length === 0 ? (
+            {loading ? (
+              <div className="h-[500px] flex items-center justify-center">
+                <p className="font-headline text-xl animate-pulse text-primary">Abriendo el baúl...</p>
+              </div>
+            ) : cards.length === 0 ? (
               <div className="h-[500px] border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-muted-foreground space-y-4">
                 <p className="font-headline text-2xl">Su archivo está vacío.</p>
                 <p className="text-xs uppercase tracking-[0.2em]">Cree su primera carta debajo</p>
               </div>
             ) : (
               <Carousel 
-                opts={{ align: "start", loop: true }}
+                opts={{ align: "start", loop: cards.length > 1 }}
                 className="w-full"
               >
                 <CarouselContent className="-ml-8">
@@ -172,7 +252,6 @@ export default function CarteBlanchePage() {
         </div>
       </section>
 
-      {/* Footer / Brand Details */}
       <footer className="py-24 bg-foreground text-white/80">
         <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-16">
           <div className="space-y-6">
@@ -202,7 +281,6 @@ export default function CarteBlanchePage() {
         </div>
       </footer>
 
-      {/* Fixed Upload Trigger */}
       <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />
     </div>
   );
