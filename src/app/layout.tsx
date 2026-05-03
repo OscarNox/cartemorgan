@@ -3,8 +3,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Exhibición Carte Blanche | Editorial de Lujo',
-  description: 'Un escaparate sofisticado para documentos y fotografía.',
+  title: 'Carte Morgan | Nuestros suspiros',
+  description: 'Cada parte de nuestro amor esatra con nosotros.',
 };
 
 export default function RootLayout({
