@@ -1,52 +1,38 @@
 
-# Carte Blanche - Guía de Configuración Local y Despliegue
+# Carte Blanche - Guía de Configuración y Despliegue
 
-Este proyecto es una aplicación de Next.js de alta gama con integración de IA (Genkit) y base de datos persistente (Firebase Firestore).
+Este proyecto es una aplicación de Next.js con IA (Genkit) y base de datos (Firebase Firestore).
 
-## 1. Funcionamiento Técnico
+## 1. ¿Cómo funciona?
+- **IA de Análisis**: Usa **Genkit** con **Gemini 2.5 Flash** para resumir PDFs.
+- **Base de Datos**: Usa **Firebase Firestore** para guardar fotos y cartas permanentemente.
+- **Coste $0**: Puedes desplegar esto gratis en Netlify con un subdominio gratuito.
 
-- **IA de Análisis**: Usa **Genkit** con **Gemini 2.5 Flash** para resumir PDFs en español.
-- **Base de Datos**: Integración con **Firebase Firestore** para guardar fotos y cartas permanentemente.
-- **Seguridad de Datos**: Los documentos se almacenan como Data URIs (Base64) en Firestore. Nota: Firestore tiene un límite de 1MB por documento. Para PDFs muy grandes, se recomienda integrar Firebase Storage en el futuro.
-
-## 2. Configuración en VS Code
-
-1. **Descarga el Proyecto**: Extrae el archivo ZIP.
-2. **Instala las Dependencias**:
+## 2. Configuración en VS Code (Local)
+1. Descarga el ZIP y ábrelo en VS Code.
+2. Instala las librerías:
    ```bash
    npm install
    ```
+3. Crea un archivo `.env.local` en la raíz y añade tus llaves:
+   ```env
+   GOOGLE_GENAI_API_KEY=tu_clave_gemini
+   NEXT_PUBLIC_FIREBASE_API_KEY=...
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+   NEXT_PUBLIC_FIREBASE_APP_ID=...
+   ```
 
-## 3. Variables de Entorno (.env.local)
+## 3. Despliegue GRATIS (Netlify)
+No necesitas comprar un dominio. Sigue estos pasos:
+1. Sube tu carpeta a un repositorio de **GitHub**.
+2. Entra en [Netlify](https://www.netlify.com/) y dale a "Add new site" > "Import from git".
+3. Selecciona tu repositorio.
+4. **IMPORTANTE**: Ve a "Site Settings" > "Environment Variables" y añade todas las variables de tu `.env.local`.
+5. Netlify te dará una URL como `https://nombre-al azar.netlify.app`. ¡Esa es tu dirección pública!
 
-Crea un archivo `.env.local` en la raíz con lo siguiente:
-
-```env
-# Google AI
-GOOGLE_GENAI_API_KEY=tu_clave_de_gemini
-
-# Firebase Configuration (Obtenlas en console.firebase.google.com)
-NEXT_PUBLIC_FIREBASE_API_KEY=tu_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu_proyecto_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=tu_app_id
-```
-
-## 4. Comandos de Ejecución
-
-- **Modo Desarrollo**:
-  ```bash
-  npm run dev
-  ```
-
-## 5. Cómo Desplegar en Netlify
-
-1. Sube tu código a GitHub.
-2. Conecta el repo en Netlify.
-3. Añade TODAS las variables de entorno de arriba en `Site Settings > Environment Variables`.
-4. El archivo `netlify.toml` ya está configurado para el despliegue automático.
-
----
-*Nota: Asegúrate de habilitar "Cloud Firestore" en tu consola de Firebase y configurar las reglas de seguridad en "Test Mode" para el desarrollo inicial.*
+## 4. Comandos Útiles
+- `npm run dev`: Probar en tu computadora (localhost:9002).
+- `npm run build`: Preparar la app para subirla a internet.
