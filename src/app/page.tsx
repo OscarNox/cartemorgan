@@ -61,7 +61,7 @@ export default function CarteBlanchePage() {
       <nav className="fixed top-0 left-0 w-full p-8 flex justify-between items-start z-40 mix-blend-difference pointer-events-none">
         <div className="pointer-events-auto">
           <h1 className="font-headline text-3xl text-white tracking-tighter">Carte Morgan.</h1>
-          <p className="font-body text-[10px] uppercase tracking-[0.4em] text-white/60">Editorial 2025-2026</p>
+          <p className="font-body text-[10px] uppercase tracking-[0.4em] text-white/60">2024 to end.</p>
         </div>
         <div className="vertical-label pointer-events-auto">
           <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Est. Cotuí / Rep. Dom.</span>
@@ -86,8 +86,10 @@ export default function CarteBlanchePage() {
              <div className="w-1 px-4 border-l border-primary/20 h-24" />
           </div>
           <p className="max-w-md mx-auto font-body text-muted-foreground leading-loose">
-            Un espacio curado donde la fotografía se encuentra con la documentación. 
-            Una experiencia editorial asimétrica diseñada para el curador sofisticado.
+            Mientras nuestras almas respiren, la mia siempre encontrara el camino para llegar 
+            ti, incluso en los dias donde los ojos no puedan ver, siempre sabre donde esta el camino. 
+            Siempre que quieras sentir lo que hay dentro de mi corazon, tendras esta llave 
+            para que puedas entrar cuando quieras.
           </p>
         </div>
 
@@ -98,8 +100,8 @@ export default function CarteBlanchePage() {
       {/* Continuous Photo Carousel */}
       <section className="py-24 space-y-12">
         <div className="px-8 flex justify-between items-end max-w-7xl mx-auto scroll-reveal">
-          <h3 className="font-headline text-4xl">Narrativas Visuales</h3>
-          <span className="text-[10px] uppercase tracking-[0.3em] font-bold pb-2 text-primary">Movimiento Infinito</span>
+          <h3 className="font-headline text-4xl">Nuestras Historias</h3>
+          <span className="text-[10px] uppercase tracking-[0.3em] font-bold pb-2 text-primary">La esencia de cada dia</span>
         </div>
         <PhotoCarousel photos={photos} />
       </section>
@@ -110,27 +112,28 @@ export default function CarteBlanchePage() {
           
           <div className="md:col-span-4 space-y-12 scroll-reveal">
             <div className="space-y-4">
-              <h3 className="font-headline text-5xl leading-tight">Archivo de <br />Documentos</h3>
+              <h3 className="font-headline text-5xl leading-tight">Baúl de <br />Suspiros</h3>
               <p className="font-body text-muted-foreground leading-relaxed">
-                Experimente sus documentos como objetos táctiles y elegantes. Cada tarjeta es un portal 
-                a una historia más profunda, analizada y revelada con precisión.
+                Cada sentimiento que tengamos, cada pensamiento, cada suspiro, es importante,
+                 hay que darle la importancia necesaria a lo que te importa, por eso quiero que siempre
+                 que pensemos en cada uno, sea importante.
               </p>
             </div>
             
             <div className="p-8 border-l border-primary/20 bg-background/50 space-y-6">
               <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Vista Previa Interactiva</p>
-                <p className="text-xs italic text-muted-foreground">Pase el cursor sobre cualquier tarjeta para revelar su esencia.</p>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Cada uno de nuestros suspiros.</p>
+                <p className="text-xs italic text-muted-foreground">Sentimientos, pensamientos, deseos.</p>
               </div>
               <Separator className="bg-primary/10" />
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-headline">{cards.length}</p>
-                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Tarjetas Totales</p>
+                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Cartas Totales</p>
                 </div>
                 <div>
                   <p className="text-2xl font-headline text-primary">01</p>
-                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Volumen</p>
+                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Publicaciones</p>
                 </div>
               </div>
             </div>
@@ -140,7 +143,7 @@ export default function CarteBlanchePage() {
             {cards.length === 0 ? (
               <div className="h-[500px] border-2 border-dashed border-primary/10 flex flex-col items-center justify-center text-muted-foreground space-y-4">
                 <p className="font-headline text-2xl">Su archivo está vacío.</p>
-                <p className="text-xs uppercase tracking-[0.2em]">Cree su primera tarjeta debajo</p>
+                <p className="text-xs uppercase tracking-[0.2em]">Cree su primera carta debajo</p>
               </div>
             ) : (
               <Carousel 
@@ -173,22 +176,23 @@ export default function CarteBlanchePage() {
       <footer className="py-24 bg-foreground text-white/80">
         <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-16">
           <div className="space-y-6">
-            <h4 className="font-headline text-3xl text-white">Carte Blanche.</h4>
+            <h4 className="font-headline text-3xl text-white">Carte Morgan.</h4>
             <p className="text-xs leading-loose font-light">
-              Diseñando el futuro del archivo editorial. Cada pieza cargada es un paso hacia una historia más hermosa.
+              Siempre que queramos dar un vistaso hacia atras, aqui estare, siempre...
             </p>
           </div>
           <div className="space-y-6">
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Filosofía</p>
+            <p className="text-[10px] uppercase tracking-widest text-white/40">Conversaciones necesarias.</p>
             <ul className="space-y-2 text-xs">
-              <li className="hover:text-primary transition-colors cursor-pointer">El Arte de Curar</li>
-              <li className="hover:text-primary transition-colors cursor-pointer">Estándares Editoriales Digitales</li>
-              <li className="hover:text-primary transition-colors cursor-pointer">Estética Atemporal</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Hacer las cosas bien.</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Esto es lo que realmente deseas?.</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Que es lo que amas.</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Hasta cuando seguiras aqui?.</li>
             </ul>
           </div>
           <div className="space-y-6 text-right md:text-left">
             <p className="text-[10px] uppercase tracking-widest text-white/40">Contacto</p>
-            <p className="text-xs italic">info@carteblanche.studio</p>
+            <p className="text-xs italic">jerezsantosjoseoscar@gmail.com</p>
             <div className="flex gap-4 pt-4 md:justify-start justify-end">
               <div className="w-8 h-px bg-white/20" />
               <div className="w-8 h-px bg-primary" />
