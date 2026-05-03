@@ -171,7 +171,7 @@ export default function CarteBlanchePage() {
 
       <section className="py-24 space-y-12">
         <div className="px-8 flex justify-between items-end max-w-7xl mx-auto scroll-reveal">
-          <h3 className="font-headline text-4xl">Historias Visuales</h3>
+          <h3 className="font-headline text-4xl">Nuestras Historias</h3>
           <span className="text-[10px] uppercase tracking-[0.3em] font-bold pb-2 text-primary">La esencia de cada día</span>
         </div>
         <PhotoCarousel photos={photos} />
@@ -264,8 +264,8 @@ export default function CarteBlanchePage() {
             </ul>
           </div>
           <div className="space-y-6 text-right md:text-left">
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Contacto</p>
-            <p className="text-xs italic">jerezsantosjoseoscar@gmail.com</p>
+            <p className="text-[10px] uppercase tracking-widest text-white/40">Siempre tuyo</p>
+            <p className="text-xs italic">Siempre estare para ti</p>
             <div className="flex gap-4 pt-4 md:justify-start justify-end">
               <div className="w-8 h-px bg-white/20" />
               <div className="w-8 h-px bg-primary" />
