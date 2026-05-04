@@ -192,7 +192,7 @@ export default function CarteBlanchePage() {
           </div>
           <div className="space-y-2">
             <h4 className="font-headline text-4xl md:text-5xl text-foreground tracking-tighter">Carte Morgan.</h4>
-            <p className="text-[10px] uppercase tracking-[0.6em] text-primary font-bold">Nuestra Antología Eterna</p>
+            <p className="text-[10px] uppercase tracking-[0.6em] text-primary font-bold">Nuestra Propia antología</p>
           </div>
           <div className="pt-8 flex flex-col items-center gap-6">
             <div className="w-px h-12 bg-primary/20" />
