@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * CORE PHILOSOPHY:
+     * This ruleset implements a "Public Read, Owner Write" security model for content 
+     * (Photos and Cards) and a strict "User Ownership" model for user profiles. 
+     * 
+     * DATA STRUCTURE:
+     * - /users/{userId}: Private profile documents accessible only by the owner.
+     * - /photos/{photoId}: Metadata for images stored in Google Drive. Publicly viewable, 
+     *   editable only by the creator.
+     * - /cards/{cardId}: Metadata for PDF/Cover image pairs. Publicly viewable, 
+     *   editable only by the creator.
+     * 
+     * KEY SECURITY DECISIONS:
+     * 1. Authorization Independence: We denormalize 'uploadedByUserId' into every 
+     *    Photo and Card document. This allows for fast, stateless ownership checks 
+     *    without using expensive get() calls.
+     * 2. Spectator Access: Read and List operations are open for content collections 
+     *    to allow unauthenticated visitors to view the gallery.
+     * 3. Relational Integrity: On creation, we strictly enforce that the 
+     *    'uploadedByUserId' field matches the authenticated user's ID.
+     */
+
+    // --- Helper Functions ---
+
+    /** @description Checks if the request is from an authenticated user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** @description Checks if the authenticated user is the owner of an existing document. */
+    function isExistingOwner(ownerId) {
+      return resource != null && isOwner(ownerId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Stores individual user profiles. Restricted to the account owner.
+     * @path /users/{userId}
+     * @allow (create) request with UID 'abc' to path /users/abc
+     * @deny (get) request with UID 'abc' to path /users/xyz
+     * @principle Restricts access to a user's own data tree and enforces self-creation.
+     */
+    match /users/{userId} {
+      allow get, list, update: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Publicly readable photos. Only the uploader can modify or delete.
+     * @path /photos/{photoId}
+     * @allow (get) any unauthenticated user
+     * @allow (create) authenticated user setting 'uploadedByUserId' to their own UID
+     * @deny (update) user 'abc' trying to modify a photo uploaded by 'xyz'
+     * @principle Public read with owner-only writes using denormalized identity.
+     */
+    match /photos/{photoId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.uploadedByUserId == request.auth.uid;
+      allow update: if isExistingOwner(resource.data.uploadedByUserId) && request.resource.data.uploadedByUserId == resource.data.uploadedByUserId;
+      allow delete: if isExistingOwner(resource.data.uploadedByUserId);
+    }
+
+    /**
+     * @description Publicly readable cards (PDF + Cover). Only the uploader can modify or delete.
+     * @path /cards/{cardId}
+     * @allow (list) any unauthenticated spectator
+     * @allow (delete) the owner of the card
+     * @deny (create) authenticated user trying to set 'uploadedByUserId' to someone else
+     * @principle Enforces relational integrity and owner-level write permissions.
+     */
+    match /cards/{cardId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.uploadedByUserId == request.auth.uid;
+      allow update: if isExistingOwner(resource.data.uploadedByUserId) && request.resource.data.uploadedByUserId == resource.data.uploadedByUserId;
+      allow delete: if isExistingOwner(resource.data.uploadedByUserId);
+    }
+  }
+}
