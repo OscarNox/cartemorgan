@@ -1,36 +1,47 @@
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
 import { PhotoCarousel } from '@/components/photo-carousel';
 import { CardPreview } from '@/components/card-preview';
 import { UploadSection } from '@/components/upload-section';
+import { AuthModal } from '@/components/auth-modal';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
-import { db } from '@/lib/firebase';
+import { Button } from '@/components/ui/button';
+import { useFirestore, useUser, useAuth } from '@/firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { LogOut, User as UserIcon } from 'lucide-react';
 
 interface CardData {
   id: string;
   coverImage: string;
   pdfDataUri: string;
+  uploadedByUserId: string;
   createdAt: any;
 }
 
 interface PhotoData {
   id: string;
   url: string;
+  uploadedByUserId: string;
   createdAt: any;
 }
 
 export default function CarteBlanchePage() {
   const { toast } = useToast();
+  const db = useFirestore();
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
   const [photos, setPhotos] = useState<PhotoData[]>([]);
   const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Escucha en tiempo real de la colección de fotos
+    if (!db) return;
+
     const qPhotos = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
     const unsubscribePhotos = onSnapshot(qPhotos, (snapshot) => {
       const fetchedPhotos = snapshot.docs.map(doc => ({
@@ -40,7 +51,6 @@ export default function CarteBlanchePage() {
       setPhotos(fetchedPhotos);
     });
 
-    // Escucha en tiempo real de la colección de cartas
     const qCards = query(collection(db, 'cards'), orderBy('createdAt', 'desc'));
     const unsubscribeCards = onSnapshot(qCards, (snapshot) => {
       const fetchedCards = snapshot.docs.map(doc => ({
@@ -55,7 +65,7 @@ export default function CarteBlanchePage() {
       unsubscribePhotos();
       unsubscribeCards();
     };
-  }, []);
+  }, [db]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -71,9 +81,11 @@ export default function CarteBlanchePage() {
   }, [cards, photos]);
 
   const addPhoto = async (url: string) => {
+    if (!user || !db) return;
     try {
       await addDoc(collection(db, 'photos'), {
         url,
+        uploadedByUserId: user.uid,
         createdAt: serverTimestamp()
       });
       toast({
@@ -81,23 +93,22 @@ export default function CarteBlanchePage() {
         description: "Tu fotografía ha sido guardada en la galería eterna."
       });
     } catch (error) {
-      console.error("Error al añadir foto:", error);
       toast({
         variant: "destructive",
-        title: "Error de Conexión",
-        description: "No se pudo guardar la imagen. Revisa tu configuración de Firebase."
+        title: "Error",
+        description: "No tienes permisos para subir fotos."
       });
     }
   };
   
   const addCard = async (cover: string, pdf: string) => {
+    if (!user || !db) return;
     try {
-      // Límite de seguridad para Firestore (1MB por documento)
       if (pdf.length > 850000) {
         toast({
           variant: "destructive",
           title: "Documento muy pesado",
-          description: "El PDF supera el límite de guardado. Intenta optimizar el archivo."
+          description: "El PDF supera el límite de guardado."
         });
         return;
       }
@@ -105,6 +116,7 @@ export default function CarteBlanchePage() {
       await addDoc(collection(db, 'cards'), {
         coverImage: cover,
         pdfDataUri: pdf,
+        uploadedByUserId: user.uid,
         createdAt: serverTimestamp()
       });
       toast({
@@ -112,41 +124,67 @@ export default function CarteBlanchePage() {
         description: "Tu nuevo suspiro ha sido guardado permanentemente."
       });
     } catch (error) {
-      console.error("Error al añadir carta:", error);
       toast({
         variant: "destructive",
-        title: "Error de Base de Datos",
-        description: "Hubo un problema al subir la carta a la nube."
+        title: "Error",
+        description: "No tienes permisos para subir cartas."
       });
     }
   };
 
   const deleteCard = async (id: string) => {
+    if (!user || !db) return;
     try {
       await deleteDoc(doc(db, 'cards', id));
       toast({
         title: "Registro Removido",
-        description: "La carta ha sido eliminada del archivo permanentemente."
+        description: "La carta ha sido eliminada del archivo."
       });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo eliminar el registro de la base de datos."
+        description: "Solo el dueño puede eliminar este registro."
       });
     }
+  };
+
+  const handleSignOut = () => {
+    signOut(auth);
+    toast({
+      title: "Sesión Cerrada",
+      description: "Ahora estás en modo espectador."
+    });
   };
 
   return (
     <div className="min-h-screen botanical-pattern relative overflow-hidden selection:bg-primary/20">
       
-      <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-40 mix-blend-difference pointer-events-none">
+      <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-40 mix-blend-difference">
         <div className="pointer-events-auto">
           <h1 className="font-headline text-2xl md:text-3xl text-white tracking-tighter">Carte Morgan.</h1>
           <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/60">Archivo de Momentos Eternos</p>
         </div>
-        <div className="vertical-label pointer-events-auto hidden sm:block">
-          <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Memorias Sincronizadas</span>
+        
+        <div className="flex items-center gap-4 pointer-events-auto">
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="hidden md:block text-[9px] uppercase tracking-widest text-white/60">Editor: {user.email?.split('@')[0]}</span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleSignOut}
+                className="text-white hover:bg-white/10 rounded-none"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
+          ) : (
+            <AuthModal />
+          )}
+          <div className="vertical-label hidden sm:block ml-4">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Memorias Sincronizadas</span>
+          </div>
         </div>
       </nav>
 
@@ -167,8 +205,8 @@ export default function CarteBlanchePage() {
              <div className="w-px bg-primary/20 h-16 md:h-24" />
           </div>
           <p className="max-w-md mx-auto font-body text-sm md:text-base text-muted-foreground leading-loose px-4">
-            Este es nuestro rincón sagrado. Aquí guardamos cada carta y fotografía que define nuestra historia, 
-            con una base de datos segura que garantiza que nuestros recuerdos duren para siempre.
+            Este es nuestro rincón sagrado. Aquí guardamos cada carta y fotografía que define nuestra historia. 
+            {user ? " Estás en modo edición." : " Estás en modo espectador."}
           </p>
         </div>
       </section>
@@ -225,7 +263,7 @@ export default function CarteBlanchePage() {
                 <p className="font-headline text-2xl">El archivo está listo</p>
                 <p className="text-[10px] uppercase tracking-[0.2em] leading-loose">
                   Tu historia comienza con la primera carga. <br />
-                  Usa el botón flotante para añadir un nuevo recuerdo.
+                  {user ? "Usa el botón flotante para añadir un nuevo recuerdo." : "Inicia sesión para empezar a archivar."}
                 </p>
               </div>
             ) : (
@@ -240,6 +278,7 @@ export default function CarteBlanchePage() {
                         id={card.id}
                         coverImage={card.coverImage}
                         pdfDataUri={card.pdfDataUri}
+                        uploadedByUserId={card.uploadedByUserId}
                         onDelete={deleteCard}
                       />
                     </CarouselItem>
@@ -260,14 +299,14 @@ export default function CarteBlanchePage() {
           <div className="space-y-6">
             <h4 className="font-headline text-3xl text-white">Carte Morgan.</h4>
             <p className="text-xs leading-loose font-light max-w-xs">
-              Un refugio digital potenciado por Firebase y Gemini AI. Guardado para siempre en la nube.
+              Un refugio digital potenciado por Firebase y Gemini AI. Guardado para siempre en la nube de Google.
             </p>
           </div>
           <div className="space-y-6">
             <p className="text-[10px] uppercase tracking-widest text-white/40">Gestión de Datos</p>
             <ul className="space-y-3 text-xs">
               <li className="hover:text-primary transition-colors cursor-pointer">Seguridad Firestore</li>
-              <li className="hover:text-primary transition-colors cursor-pointer">Sincronización Cloud</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Persistencia de Google</li>
               <li className="hover:text-primary transition-colors cursor-pointer">Privacidad</li>
             </ul>
           </div>
@@ -281,7 +320,7 @@ export default function CarteBlanchePage() {
         </div>
       </footer>
 
-      <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />
+      {user && <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />}
     </div>
   );
 }

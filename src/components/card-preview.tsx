@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Trash2, FileText, Sparkles, Eye, X, Quote } from 'lucide-react';
 import { generatePdfHighlights } from '@/ai/flows/generate-pdf-highlights-flow';
+import { useUser } from '@/firebase';
 import {
   Dialog,
   DialogContent,
@@ -15,14 +16,16 @@ interface CardPreviewProps {
   id: string;
   coverImage: string;
   pdfDataUri: string;
+  uploadedByUserId: string;
   onDelete: (id: string) => void;
 }
 
-export function CardPreview({ id, coverImage, pdfDataUri, onDelete }: CardPreviewProps) {
+export function CardPreview({ id, coverImage, pdfDataUri, uploadedByUserId, onDelete }: CardPreviewProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [highlights, setHighlights] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const { user } = useUser();
 
   const handleReveal = async () => {
     if (!highlights && !isLoading) {
@@ -45,6 +48,8 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete }: CardPrevie
       else setIsFlipped(false);
     }
   };
+
+  const isOwner = user?.uid === uploadedByUserId;
 
   return (
     <>
@@ -74,19 +79,21 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete }: CardPrevie
                 </div>
               </div>
 
-              <div className="absolute bottom-4 right-4 z-20 md:opacity-0 md:group-hover:opacity-100 transition-all">
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="h-10 w-10 rounded-none bg-white text-destructive hover:bg-destructive hover:text-white border border-destructive/20 shadow-xl"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(id);
-                  }}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+              {isOwner && (
+                <div className="absolute bottom-4 right-4 z-20 md:opacity-0 md:group-hover:opacity-100 transition-all">
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="h-10 w-10 rounded-none bg-white text-destructive hover:bg-destructive hover:text-white border border-destructive/20 shadow-xl"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(id);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
 
               <div className="absolute bottom-4 left-4 md:hidden z-20">
                 <div className="bg-white/90 px-3 py-1.5 text-[9px] uppercase tracking-widest text-primary font-bold shadow-sm">
@@ -140,14 +147,13 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete }: CardPrevie
             
             <div className="pt-6 border-t border-primary/10 text-center">
               <p className="text-[9px] uppercase tracking-[0.3em] text-primary/40 font-bold">
-                Archivo Carte Morgan • 2024
+                Archivo Carte Morgan • {new Date().getFullYear()}
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal de Vista Previa del PDF */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 overflow-hidden bg-white border-none shadow-2xl flex flex-col rounded-none">
           <div className="p-4 md:p-6 bg-primary/[0.03] border-b border-primary/10 flex justify-between items-center shrink-0">
@@ -157,7 +163,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete }: CardPrevie
               </div>
               <div>
                 <h2 className="font-headline text-lg md:text-xl text-foreground">Documento Original</h2>
-                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">Nuestros Suspiros Digitalizados</p>
+                <p className="text-[9px] uppercase trackingwidest text-muted-foreground mt-0.5">Nuestros Suspiros Digitalizados</p>
               </div>
             </div>
             <Button 
