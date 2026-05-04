@@ -13,7 +13,7 @@ import { useFirestore, useUser, useAuth } from '@/firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut } from 'lucide-react';
+import { LogOut, ShieldCheck } from 'lucide-react';
 
 interface CardData {
   id: string;
@@ -39,7 +39,6 @@ export default function CarteBlanchePage() {
   const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Definimos si el usuario actual es el administrador autorizado
   const isAdmin = user?.email === 'aidaluxmorgan@gmail.com';
 
   useEffect(() => {
@@ -147,7 +146,7 @@ export default function CarteBlanchePage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Solo el administrador puede eliminar este registro."
+        description: "Acción no permitida."
       });
     }
   };
@@ -156,7 +155,7 @@ export default function CarteBlanchePage() {
     signOut(auth);
     toast({
       title: "Sesión Cerrada",
-      description: "Ahora estás en modo espectador."
+      description: "Has vuelto al modo espectador."
     });
   };
 
@@ -170,22 +169,24 @@ export default function CarteBlanchePage() {
         </div>
         
         <div className="flex items-center gap-4 pointer-events-auto">
-          {user ? (
-            <div className="flex items-center gap-3">
-              <span className="hidden md:block text-[9px] uppercase tracking-widest text-white/60">
-                {isAdmin ? "Administrador: " : "Espectador: "} {user.email?.split('@')[0]}
-              </span>
+          {user && (
+            <div className="flex items-center gap-3 animate-in fade-in slide-in-from-right-4">
+              <div className="hidden md:flex flex-col items-end">
+                <span className="text-[9px] uppercase tracking-widest text-white/80 font-bold flex items-center gap-1.5">
+                  {isAdmin && <ShieldCheck className="w-3 h-3 text-primary" />}
+                  {isAdmin ? "Admin" : "Espectador"}
+                </span>
+                <span className="text-[8px] text-white/40 uppercase tracking-tighter">{user.email}</span>
+              </div>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={handleSignOut}
-                className="text-white hover:bg-white/10 rounded-none"
+                className="text-white hover:bg-white/10 rounded-none h-10 w-10"
               >
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>
-          ) : (
-            <AuthModal />
           )}
           <div className="vertical-label hidden sm:block ml-4">
             <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Memorias Sincronizadas</span>
@@ -210,8 +211,8 @@ export default function CarteBlanchePage() {
              <div className="w-px bg-primary/20 h-16 md:h-24" />
           </div>
           <p className="max-w-md mx-auto font-body text-sm md:text-base text-muted-foreground leading-loose px-4">
-            Este es nuestro rincón sagrado. Aquí guardamos cada carta y fotografía que define nuestra historia. 
-            {isAdmin ? " Estás en modo administrador." : " Estás en modo espectador."}
+            Un rincón sagrado para nuestras palabras y memorias. 
+            {isAdmin ? " Control total activado." : " Disfruta de nuestra historia."}
           </p>
         </div>
       </section>
@@ -222,7 +223,7 @@ export default function CarteBlanchePage() {
             <h3 className="font-headline text-3xl md:text-4xl">Galería Visual</h3>
             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-2">Nuestros momentos en píxeles</p>
           </div>
-          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-primary">Persistencia Activada</span>
+          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-primary">RT Sincronizado</span>
         </div>
         <PhotoCarousel photos={photos.map(p => p.url)} />
       </section>
@@ -234,15 +235,15 @@ export default function CarteBlanchePage() {
             <div className="space-y-4">
               <h3 className="font-headline text-4xl md:text-5xl leading-tight">Baúl de <br />Cartas</h3>
               <p className="font-body text-sm md:text-base text-muted-foreground leading-relaxed">
-                Cada carta subida es analizada por nuestra IA para extraer la esencia de lo que sentimos. 
-                Los datos se sincronizan automáticamente en todos tus dispositivos.
+                Cada carta subida es analizada para extraer la esencia emocional. 
+                Tus datos están protegidos y sincronizados para siempre.
               </p>
             </div>
             
             <div className="p-8 border border-primary/10 bg-primary/[0.02] space-y-6">
               <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Estado de la Base de Datos</p>
-                <p className="text-[11px] italic text-muted-foreground">Conectado a Firebase Cloud Firestore.</p>
+                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Estado del Archivo</p>
+                <p className="text-[11px] italic text-muted-foreground">Persistencia en tiempo real activada.</p>
               </div>
               <Separator className="bg-primary/10" />
               <div className="grid grid-cols-2 gap-4 text-center">
@@ -251,8 +252,8 @@ export default function CarteBlanchePage() {
                   <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Documentos</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-headline text-primary">RT</p>
-                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Sincronización</p>
+                  <p className="text-2xl font-headline text-primary">ACT</p>
+                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Estado</p>
                 </div>
               </div>
             </div>
@@ -267,8 +268,7 @@ export default function CarteBlanchePage() {
               <div className="h-[400px] border border-dashed border-primary/20 flex flex-col items-center justify-center text-muted-foreground space-y-6 px-10 text-center">
                 <p className="font-headline text-2xl">El archivo está listo</p>
                 <p className="text-[10px] uppercase tracking-[0.2em] leading-loose">
-                  Tu historia comienza con la primera carga. <br />
-                  {isAdmin ? "Usa el botón flotante para añadir un nuevo recuerdo." : "Inicia sesión como administrador para empezar a archivar."}
+                  Usa el botón flotante para empezar a guardar memorias.
                 </p>
               </div>
             ) : (
@@ -305,28 +305,31 @@ export default function CarteBlanchePage() {
           <div className="space-y-6">
             <h4 className="font-headline text-3xl text-white">Carte Morgan.</h4>
             <p className="text-xs leading-loose font-light max-w-xs">
-              Un refugio digital potenciado por Firebase y Gemini AI. Guardado para siempre en la nube de Google.
+              Un refugio digital potenciado por Firebase y Gemini AI. Guardado para siempre.
             </p>
           </div>
           <div className="space-y-6">
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Gestión de Datos</p>
+            <p className="text-[10px] uppercase tracking-widest text-white/40">Sistema</p>
             <ul className="space-y-3 text-xs">
-              <li className="hover:text-primary transition-colors cursor-pointer">Seguridad Firestore</li>
-              <li className="hover:text-primary transition-colors cursor-pointer">Persistencia de Google</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Seguridad</li>
               <li className="hover:text-primary transition-colors cursor-pointer">Privacidad</li>
             </ul>
           </div>
           <div className="space-y-6">
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Estado del Sistema</p>
+            <p className="text-[10px] uppercase tracking-widest text-white/40">Estado</p>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <p className="text-xs italic">Base de datos activa.</p>
+              <p className="text-xs italic">Sincronización activa.</p>
             </div>
           </div>
         </div>
       </footer>
 
-      {isAdmin && <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />}
+      {!user ? (
+        <AuthModal />
+      ) : (
+        isAdmin && <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />
+      )}
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useAuth } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, Heart } from 'lucide-react';
+import { Lock, Mail, Heart, User } from 'lucide-react';
 
 export function AuthModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +23,6 @@ export function AuthModal() {
     e.preventDefault();
     setLoading(true);
     try {
-      // Intentamos iniciar sesión con las credenciales proporcionadas
       await signInWithEmailAndPassword(auth, email, password);
       
       if (email === 'aidaluxmorgan@gmail.com') {
@@ -46,8 +45,11 @@ export function AuthModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="text-white border-white/20 hover:bg-white/10 rounded-none text-[10px] uppercase tracking-widest px-6 h-9">
-          Acceso Privado
+        <Button 
+          variant="outline" 
+          className="fixed bottom-8 right-8 md:bottom-12 md:right-12 z-50 h-14 w-14 md:h-16 md:w-16 rounded-full shadow-2xl bg-white border-primary/10 text-primary hover:bg-primary hover:text-white transition-all duration-500 group animate-in fade-in slide-in-from-bottom-4"
+        >
+          <Lock className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[400px] bg-white border-none p-0 overflow-hidden rounded-none shadow-2xl">
@@ -57,14 +59,14 @@ export function AuthModal() {
             <DialogTitle className="font-headline text-3xl text-foreground">
               Identificación
             </DialogTitle>
-            <p className="text-[10px] font-body tracking-[0.3em] uppercase text-muted-foreground mt-2">Solo Personal Autorizado</p>
+            <p className="text-[10px] font-body tracking-[0.3em] uppercase text-muted-foreground mt-2">Acceso al Archivo Privado</p>
           </DialogHeader>
         </div>
 
         <form onSubmit={handleAuth} className="p-8 space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email de Usuario</Label>
+              <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 w-4 h-4 text-primary/40" />
                 <Input 
@@ -94,11 +96,11 @@ export function AuthModal() {
           </div>
 
           <Button type="submit" className="w-full h-12 rounded-none font-bold uppercase tracking-widest text-xs" disabled={loading}>
-            {loading ? 'Verificando...' : 'Acceder al Archivo'}
+            {loading ? 'Verificando...' : 'Entrar al Sistema'}
           </Button>
 
           <p className="text-center text-[9px] uppercase tracking-widest text-muted-foreground leading-relaxed">
-            El acceso a la edición está restringido a la propiedad de Carte Morgan.
+            Solo el administrador tiene permisos de edición.
           </p>
         </form>
       </DialogContent>
