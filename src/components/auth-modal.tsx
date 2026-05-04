@@ -7,13 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { User, Lock, Mail, Heart } from 'lucide-react';
+import { Lock, Mail, Heart } from 'lucide-react';
 
 export function AuthModal() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,19 +23,20 @@ export function AuthModal() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        toast({ title: "Bienvenido", description: "Has accedido al modo edición." });
+      // Intentamos iniciar sesión con las credenciales proporcionadas
+      await signInWithEmailAndPassword(auth, email, password);
+      
+      if (email === 'aidaluxmorgan@gmail.com') {
+        toast({ title: "Bienvenida, Aida", description: "Modo administrador activado." });
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
-        toast({ title: "Cuenta Creada", description: "Ahora puedes archivar recuerdos." });
+        toast({ title: "Sesión iniciada", description: "Has accedido como espectador." });
       }
       setIsOpen(false);
     } catch (error: any) {
       toast({ 
         variant: "destructive", 
         title: "Error de Acceso", 
-        description: "Credenciales inválidas o error de red." 
+        description: "Credenciales incorrectas." 
       });
     } finally {
       setLoading(false);
@@ -47,7 +47,7 @@ export function AuthModal() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="text-white border-white/20 hover:bg-white/10 rounded-none text-[10px] uppercase tracking-widest px-6 h-9">
-          Acceder
+          Acceso Privado
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[400px] bg-white border-none p-0 overflow-hidden rounded-none shadow-2xl">
@@ -55,16 +55,16 @@ export function AuthModal() {
           <Heart className="w-6 h-6 text-primary fill-primary mx-auto mb-4" />
           <DialogHeader>
             <DialogTitle className="font-headline text-3xl text-foreground">
-              {isLogin ? 'Iniciar Sesión' : 'Registrarse'}
+              Identificación
             </DialogTitle>
-            <p className="text-[10px] font-body tracking-[0.3em] uppercase text-muted-foreground mt-2">Acceso al Archivo Privado</p>
+            <p className="text-[10px] font-body tracking-[0.3em] uppercase text-muted-foreground mt-2">Solo Personal Autorizado</p>
           </DialogHeader>
         </div>
 
         <form onSubmit={handleAuth} className="p-8 space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email</Label>
+              <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email de Usuario</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 w-4 h-4 text-primary/40" />
                 <Input 
@@ -72,7 +72,7 @@ export function AuthModal() {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 h-12 rounded-none border-primary/10 focus-visible:ring-primary/20" 
-                  placeholder="tu@email.com"
+                  placeholder="ejemplo@email.com"
                   required
                 />
               </div>
@@ -94,18 +94,11 @@ export function AuthModal() {
           </div>
 
           <Button type="submit" className="w-full h-12 rounded-none font-bold uppercase tracking-widest text-xs" disabled={loading}>
-            {loading ? 'Procesando...' : (isLogin ? 'Entrar' : 'Crear Cuenta')}
+            {loading ? 'Verificando...' : 'Acceder al Archivo'}
           </Button>
 
-          <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground">
-            {isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}
-            <button 
-              type="button" 
-              onClick={() => setIsLogin(!isLogin)}
-              className="ml-2 text-primary font-bold hover:underline"
-            >
-              {isLogin ? 'Regístrate' : 'Inicia Sesión'}
-            </button>
+          <p className="text-center text-[9px] uppercase tracking-widest text-muted-foreground leading-relaxed">
+            El acceso a la edición está restringido a la propiedad de Carte Morgan.
           </p>
         </form>
       </DialogContent>

@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Trash2, FileText, Sparkles, Eye, X, Quote } from 'lucide-react';
 import { generatePdfHighlights } from '@/ai/flows/generate-pdf-highlights-flow';
-import { useUser } from '@/firebase';
 import {
   Dialog,
   DialogContent,
@@ -18,14 +17,14 @@ interface CardPreviewProps {
   pdfDataUri: string;
   uploadedByUserId: string;
   onDelete: (id: string) => void;
+  isAdmin?: boolean;
 }
 
-export function CardPreview({ id, coverImage, pdfDataUri, uploadedByUserId, onDelete }: CardPreviewProps) {
+export function CardPreview({ id, coverImage, pdfDataUri, onDelete, isAdmin }: CardPreviewProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [highlights, setHighlights] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const { user } = useUser();
 
   const handleReveal = async () => {
     if (!highlights && !isLoading) {
@@ -48,8 +47,6 @@ export function CardPreview({ id, coverImage, pdfDataUri, uploadedByUserId, onDe
       else setIsFlipped(false);
     }
   };
-
-  const isOwner = user?.uid === uploadedByUserId;
 
   return (
     <>
@@ -79,7 +76,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, uploadedByUserId, onDe
                 </div>
               </div>
 
-              {isOwner && (
+              {isAdmin && (
                 <div className="absolute bottom-4 right-4 z-20 md:opacity-0 md:group-hover:opacity-100 transition-all">
                   <Button
                     variant="destructive"

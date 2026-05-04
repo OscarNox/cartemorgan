@@ -13,7 +13,7 @@ import { useFirestore, useUser, useAuth } from '@/firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, User as UserIcon } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 interface CardData {
   id: string;
@@ -34,10 +34,13 @@ export default function CarteBlanchePage() {
   const { toast } = useToast();
   const db = useFirestore();
   const auth = useAuth();
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const [photos, setPhotos] = useState<PhotoData[]>([]);
   const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Definimos si el usuario actual es el administrador autorizado
+  const isAdmin = user?.email === 'aidaluxmorgan@gmail.com';
 
   useEffect(() => {
     if (!db) return;
@@ -81,11 +84,11 @@ export default function CarteBlanchePage() {
   }, [cards, photos]);
 
   const addPhoto = async (url: string) => {
-    if (!user || !db) return;
+    if (!isAdmin || !db) return;
     try {
       await addDoc(collection(db, 'photos'), {
         url,
-        uploadedByUserId: user.uid,
+        uploadedByUserId: user?.uid,
         createdAt: serverTimestamp()
       });
       toast({
@@ -102,7 +105,7 @@ export default function CarteBlanchePage() {
   };
   
   const addCard = async (cover: string, pdf: string) => {
-    if (!user || !db) return;
+    if (!isAdmin || !db) return;
     try {
       if (pdf.length > 850000) {
         toast({
@@ -116,7 +119,7 @@ export default function CarteBlanchePage() {
       await addDoc(collection(db, 'cards'), {
         coverImage: cover,
         pdfDataUri: pdf,
-        uploadedByUserId: user.uid,
+        uploadedByUserId: user?.uid,
         createdAt: serverTimestamp()
       });
       toast({
@@ -133,7 +136,7 @@ export default function CarteBlanchePage() {
   };
 
   const deleteCard = async (id: string) => {
-    if (!user || !db) return;
+    if (!isAdmin || !db) return;
     try {
       await deleteDoc(doc(db, 'cards', id));
       toast({
@@ -144,7 +147,7 @@ export default function CarteBlanchePage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Solo el dueño puede eliminar este registro."
+        description: "Solo el administrador puede eliminar este registro."
       });
     }
   };
@@ -169,7 +172,9 @@ export default function CarteBlanchePage() {
         <div className="flex items-center gap-4 pointer-events-auto">
           {user ? (
             <div className="flex items-center gap-3">
-              <span className="hidden md:block text-[9px] uppercase tracking-widest text-white/60">Editor: {user.email?.split('@')[0]}</span>
+              <span className="hidden md:block text-[9px] uppercase tracking-widest text-white/60">
+                {isAdmin ? "Administrador: " : "Espectador: "} {user.email?.split('@')[0]}
+              </span>
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -206,7 +211,7 @@ export default function CarteBlanchePage() {
           </div>
           <p className="max-w-md mx-auto font-body text-sm md:text-base text-muted-foreground leading-loose px-4">
             Este es nuestro rincón sagrado. Aquí guardamos cada carta y fotografía que define nuestra historia. 
-            {user ? " Estás en modo edición." : " Estás en modo espectador."}
+            {isAdmin ? " Estás en modo administrador." : " Estás en modo espectador."}
           </p>
         </div>
       </section>
@@ -263,7 +268,7 @@ export default function CarteBlanchePage() {
                 <p className="font-headline text-2xl">El archivo está listo</p>
                 <p className="text-[10px] uppercase tracking-[0.2em] leading-loose">
                   Tu historia comienza con la primera carga. <br />
-                  {user ? "Usa el botón flotante para añadir un nuevo recuerdo." : "Inicia sesión para empezar a archivar."}
+                  {isAdmin ? "Usa el botón flotante para añadir un nuevo recuerdo." : "Inicia sesión como administrador para empezar a archivar."}
                 </p>
               </div>
             ) : (
@@ -280,6 +285,7 @@ export default function CarteBlanchePage() {
                         pdfDataUri={card.pdfDataUri}
                         uploadedByUserId={card.uploadedByUserId}
                         onDelete={deleteCard}
+                        isAdmin={isAdmin}
                       />
                     </CarouselItem>
                   ))}
@@ -320,7 +326,7 @@ export default function CarteBlanchePage() {
         </div>
       </footer>
 
-      {user && <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />}
+      {isAdmin && <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />}
     </div>
   );
 }
