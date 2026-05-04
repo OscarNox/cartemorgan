@@ -4,7 +4,12 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { 
+  getFirestore, 
+  initializeFirestore, 
+  persistentLocalCache, 
+  persistentMultipleTabManager 
+} from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
@@ -12,30 +17,37 @@ export function initializeFirebase() {
   if (!getApps().length) {
     let firebaseApp;
     try {
-      // Intentamos inicialización automática (entorno Studio)
       firebaseApp = initializeApp();
     } catch (e) {
-      // Fallback al objeto de configuración manual con corrección de bucket
       const config = {
         ...firebaseConfig,
-        // Aseguramos que el bucket de almacenamiento esté presente con los formatos estándar de Google Cloud
         storageBucket: (firebaseConfig as any).storageBucket || `${firebaseConfig.projectId}.firebasestorage.app` || `${firebaseConfig.projectId}.appspot.com`
       };
       firebaseApp = initializeApp(config);
     }
 
-    return getSdks(firebaseApp);
+    // Inicializamos Firestore con Persistencia Local en IndexedDB
+    // Esto hace que los datos se queden "en la página" (memoria del navegador) para siempre
+    const firestore = initializeFirestore(firebaseApp, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+      })
+    });
+
+    return {
+      firebaseApp,
+      auth: getAuth(firebaseApp),
+      firestore,
+      storage: getStorage(firebaseApp)
+    };
   }
 
-  return getSdks(getApp());
-}
-
-export function getSdks(firebaseApp: FirebaseApp) {
+  const app = getApp();
   return {
-    firebaseApp,
-    auth: getAuth(firebaseApp),
-    firestore: getFirestore(firebaseApp),
-    storage: getStorage(firebaseApp)
+    firebaseApp: app,
+    auth: getAuth(app),
+    firestore: getFirestore(app),
+    storage: getStorage(app)
   };
 }
 

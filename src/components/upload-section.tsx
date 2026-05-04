@@ -8,8 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useStorage } from '@/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from '@/hooks/use-toast';
 
 interface UploadSectionProps {
@@ -23,7 +21,6 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const storage = useStorage();
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (f: File | null) => void) => {
@@ -31,31 +28,31 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
     if (file) setter(file);
   };
 
-  const uploadToStorage = async (file: File, path: string) => {
-    if (!storage) throw new Error("El servicio de almacenamiento no está listo.");
-    // Limpieza básica del nombre del archivo para evitar errores de caracteres especiales
-    const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-    const fileName = `${Date.now()}-${safeName}`;
-    const storageRef = ref(storage, `${path}/${fileName}`);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
+  // Convierte un archivo a Data URI (Base64) para guardarlo "dentro" de la base de datos
+  const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   const submitPhoto = async () => {
     if (!photoFile) return;
     setIsUploading(true);
     try {
-      const url = await uploadToStorage(photoFile, 'photos');
-      onPhotoUpload(url);
+      // Guardado directo en el documento sin pasar por almacenamiento externo
+      const dataUri = await fileToDataUri(photoFile);
+      onPhotoUpload(dataUri);
       setPhotoFile(null);
       setIsOpen(false);
-      toast({ title: "¡Fotografía Guardada!", description: "Se ha añadido a vuestra antología visual." });
+      toast({ title: "¡Guardado al Instante!", description: "La foto ya es parte de la página." });
     } catch (error: any) {
-      console.error(error);
       toast({ 
         variant: "destructive", 
-        title: "Error de Subida", 
-        description: "Asegúrate de tener conexión y permisos de administrador." 
+        title: "Error de Guardado", 
+        description: "El archivo podría ser demasiado grande para el guardado directo." 
       });
     } finally {
       setIsUploading(false);
@@ -66,22 +63,21 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
     if (!cardCoverFile || !pdfFile) return;
     setIsUploading(true);
     try {
-      // Carga en paralelo para mayor velocidad
-      const [coverUrl, pdfUrl] = await Promise.all([
-        uploadToStorage(cardCoverFile, 'covers'),
-        uploadToStorage(pdfFile, 'pdfs')
+      // Convertimos ambos archivos a datos puros para que viajen juntos
+      const [coverUri, pdfUri] = await Promise.all([
+        fileToDataUri(cardCoverFile),
+        fileToDataUri(pdfFile)
       ]);
-      onCardUpload(coverUrl, pdfUrl);
+      onCardUpload(coverUri, pdfUri);
       setCardCoverFile(null);
       setPdfFile(null);
       setIsOpen(false);
-      toast({ title: "¡Carta Archivada!", description: "Vuestro mensaje ya es eterno." });
+      toast({ title: "¡Memoria Integrada!", description: "La carta se ha guardado físicamente en el archivo." });
     } catch (error: any) {
-      console.error(error);
       toast({ 
         variant: "destructive", 
-        title: "Error de Archivo", 
-        description: "No se pudieron subir los documentos. Revisa el tamaño del PDF." 
+        title: "Error de Guardado", 
+        description: "Asegúrate de que el PDF no sea excesivamente grande." 
       });
     } finally {
       setIsUploading(false);
@@ -105,7 +101,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               <Heart className="w-4 h-4 text-primary fill-primary" />
               <DialogTitle className="font-headline text-2xl">Añadir Recuerdo</DialogTitle>
             </div>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Memoria Eterna en la Nube</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Guardado Directo en la Página</p>
           </DialogHeader>
         </div>
         
@@ -121,7 +117,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               </div>
               {photoFile && (
                 <Button onClick={submitPhoto} disabled={isUploading} className="w-full h-12 rounded-none bg-primary hover:bg-primary/90 font-bold tracking-widest uppercase text-xs">
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Subir Fotografía"}
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Guardar en la Página"}
                 </Button>
               )}
             </div>
@@ -144,7 +140,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               </div>
               {cardCoverFile && pdfFile && (
                 <Button onClick={submitCard} disabled={isUploading} className="w-full h-12 rounded-none bg-primary hover:bg-primary/90 font-bold tracking-widest uppercase text-xs">
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Archivar Documento"}
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Integrar Documento"}
                 </Button>
               )}
             </div>
