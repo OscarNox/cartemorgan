@@ -3,14 +3,13 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera, FileUp, Plus, Heart, Loader2 } from 'lucide-react';
+import { Camera, FileUp, Plus, Heart, Loader2, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { useStorage } from '@/firebase';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface UploadSectionProps {
   onPhotoUpload: (url: string) => void;
@@ -23,36 +22,78 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const { toast } = useToast();
-  const storage = useStorage();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (f: File | null) => void) => {
     const file = e.target.files?.[0];
-    if (file) setter(file);
+    setErrorMsg(null);
+    if (file) {
+      // Limite de seguridad para evitar errores de sincronización (Firestore 1MB limit)
+      if (file.size > 1048576 && file.type === 'application/pdf') {
+        setErrorMsg("El PDF es demasiado grande. Intenta con uno menor a 1MB para que se guarde para siempre.");
+        return;
+      }
+      setter(file);
+    }
   };
 
-  const uploadFileToCloud = async (file: File, folder: string): Promise<string> => {
-    const storageRef = ref(storage, `${folder}/${Date.now()}-${file.name}`);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
+  // Convierte un archivo a Base64 para guardarlo directamente en la base de datos
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  // Comprime la imagen antes de guardarla para que nunca falle el guardado
+  const compressImage = async (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Redimensionar si es muy grande
+          const maxDim = 1200;
+          if (width > height && width > maxDim) {
+            height *= maxDim / width;
+            width = maxDim;
+          } else if (height > maxDim) {
+            width *= maxDim / height;
+            height = maxDim;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Calidad media para asegurar que quepa en Firestore
+          resolve(canvas.toDataURL('image/jpeg', 0.6));
+        };
+      };
+    });
   };
 
   const submitPhoto = async () => {
     if (!photoFile) return;
     setIsUploading(true);
     try {
-      const downloadUrl = await uploadFileToCloud(photoFile, 'photos');
-      onPhotoUpload(downloadUrl);
+      const base64 = await compressImage(photoFile);
+      onPhotoUpload(base64);
       setPhotoFile(null);
       setIsOpen(false);
-      toast({ title: "¡Fotografía Guardada!", description: "Se ha almacenado permanentemente en la nube." });
-    } catch (error: any) {
-      console.error(error);
-      toast({ 
-        variant: "destructive", 
-        title: "Error de Subida", 
-        description: "No se pudo subir la imagen. Revisa tu conexión." 
-      });
+      toast({ title: "¡Guardado al instante!", description: "La foto ya es parte de la página." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo procesar la imagen." });
     } finally {
       setIsUploading(false);
     }
@@ -62,24 +103,18 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
     if (!cardCoverFile || !pdfFile) return;
     setIsUploading(true);
     try {
-      // Subida en paralelo para máxima velocidad
-      const [coverUrl, pdfUrl] = await Promise.all([
-        uploadFileToCloud(cardCoverFile, 'covers'),
-        uploadFileToCloud(pdfFile, 'pdfs')
+      const [coverBase64, pdfBase64] = await Promise.all([
+        compressImage(cardCoverFile),
+        fileToBase64(pdfFile)
       ]);
       
-      onCardUpload(coverUrl, pdfUrl);
+      onCardUpload(coverBase64, pdfBase64);
       setCardCoverFile(null);
       setPdfFile(null);
       setIsOpen(false);
-      toast({ title: "¡Carta Editorial Integrada!", description: "Documento guardado con éxito." });
-    } catch (error: any) {
-      console.error(error);
-      toast({ 
-        variant: "destructive", 
-        title: "Error de Subida", 
-        description: "Hubo un problema al subir los archivos de la carta." 
-      });
+      toast({ title: "¡Carta Guardada!", description: "El documento se ha integrado correctamente." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "Error al procesar los documentos." });
     } finally {
       setIsUploading(false);
     }
@@ -102,11 +137,21 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               <Heart className="w-4 h-4 text-primary fill-primary" />
               <DialogTitle className="font-headline text-2xl">Añadir Recuerdo</DialogTitle>
             </div>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Guardado Permanente en Google Cloud</p>
+            <DialogDescription className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
+              Guardado Directo en la Página (Sin Nube Externa)
+            </DialogDescription>
           </DialogHeader>
         </div>
         
         <div className="p-6 space-y-10 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          {errorMsg && (
+            <Alert variant="destructive" className="rounded-none border-destructive/20 bg-destructive/5">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Atención</AlertTitle>
+              <AlertDescription className="text-xs">{errorMsg}</AlertDescription>
+            </Alert>
+          )}
+
           <section className="space-y-6">
             <h3 className="text-sm font-bold flex items-center gap-3 border-l-2 border-primary pl-4 text-foreground uppercase tracking-wider">
               <Camera className="w-4 h-4 text-primary" /> Nueva Fotografía
@@ -118,7 +163,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               </div>
               {photoFile && (
                 <Button onClick={submitPhoto} disabled={isUploading} className="w-full h-12 rounded-none bg-primary hover:bg-primary/90 font-bold tracking-widest uppercase text-xs">
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Subir a la Nube"}
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Guardar en la Página"}
                 </Button>
               )}
             </div>
@@ -141,7 +186,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               </div>
               {cardCoverFile && pdfFile && (
                 <Button onClick={submitCard} disabled={isUploading} className="w-full h-12 rounded-none bg-primary hover:bg-primary/90 font-bold tracking-widest uppercase text-xs">
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Subir Documentos"}
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Integrar Documentos"}
                 </Button>
               )}
             </div>
