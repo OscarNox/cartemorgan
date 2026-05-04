@@ -12,7 +12,7 @@ import { useFirestore, useUser, useAuth, useCollection, useMemoFirebase } from '
 import { collection, query, orderBy, deleteDoc, doc, serverTimestamp, addDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, ShieldCheck } from 'lucide-react';
+import { LogOut, ShieldCheck, Heart } from 'lucide-react';
 
 export default function CarteBlanchePage() {
   const { toast } = useToast();
@@ -185,12 +185,27 @@ export default function CarteBlanchePage() {
         </div>
       </section>
 
-      <footer className="py-20 bg-foreground text-white/80 text-center">
-        <h4 className="font-headline text-3xl text-white mb-4">Carte Morgan.</h4>
-        <div className="flex items-center justify-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <p className="text-xs italic">Sincronización activa con Google Cloud.</p>
+      <footer className="py-24 md:py-32 border-t border-primary/10 bg-white relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-6 text-center space-y-8 relative z-10">
+          <div className="flex justify-center">
+            <Heart className="w-6 h-6 text-primary/40 animate-pulse" />
+          </div>
+          <div className="space-y-2">
+            <h4 className="font-headline text-4xl md:text-5xl text-foreground tracking-tighter">Carte Morgan.</h4>
+            <p className="text-[10px] uppercase tracking-[0.6em] text-primary font-bold">Nuestra Antología Eterna</p>
+          </div>
+          <div className="pt-8 flex flex-col items-center gap-6">
+            <div className="w-px h-12 bg-primary/20" />
+            <p className="max-w-xs mx-auto text-[11px] leading-relaxed text-muted-foreground italic font-body">
+              "Porque cada palabra escrita es un suspiro que el tiempo no podrá borrar."
+            </p>
+            <div className="flex items-center gap-3 px-6 py-2 border border-primary/10 bg-primary/[0.02]">
+               <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+               <p className="text-[9px] uppercase tracking-widest text-primary/60 font-bold">Archivo Digital Protegido • {new Date().getFullYear()}</p>
+            </div>
+          </div>
         </div>
+        <div className="absolute top-0 left-0 w-full h-full botanical-pattern opacity-[0.03] pointer-events-none" />
       </footer>
 
       {!user ? <AuthModal /> : isAdmin && <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />}
