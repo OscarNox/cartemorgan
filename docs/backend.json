@@ -1,191 +1,36 @@
 {
   "entities": {
-    "UserProfile": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "UserProfile",
-      "type": "object",
-      "description": "Represents a user of the application, linked to their Google Drive account for file storage.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the UserProfile entity. This typically corresponds to the user's ID from the external authentication system (e.g., Google User ID)."
-        },
-        "email": {
-          "type": "string",
-          "description": "The email address associated with the user's account.",
-          "format": "email"
-        },
-        "displayName": {
-          "type": "string",
-          "description": "The user's display name or full name."
-        },
-        "googleDriveFolderId": {
-          "type": "string",
-          "description": "The ID of the dedicated Google Drive folder created for this user to store their application-specific files. This helps organize user content within their Google Drive."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp when the user profile was created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "Timestamp when the user profile was last updated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "email",
-        "googleDriveFolderId",
-        "createdAt"
-      ]
-    },
     "Photo": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Photo",
       "type": "object",
-      "description": "Represents an individual image file uploaded by a user, stored in Google Drive, for display in a carousel.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Photo entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the UserProfile who uploaded this photo. (Relationship: UserProfile 1:N Photo)"
-        },
-        "googleDriveFileId": {
-          "type": "string",
-          "description": "The Google Drive File ID for the actual image file."
-        },
-        "filename": {
-          "type": "string",
-          "description": "The original filename of the uploaded image."
-        },
-        "uploadDate": {
-          "type": "string",
-          "description": "Timestamp when the photo was uploaded.",
-          "format": "date-time"
-        },
-        "carouselOrder": {
-          "type": "number",
-          "description": "An optional numerical value to determine the display order of the photo within the carousel. Lower numbers appear first."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "googleDriveFileId",
-        "filename",
-        "uploadDate"
-      ]
+        "url": { "type": "string" },
+        "uploadedByUserId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     },
     "Card": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Card",
       "type": "object",
-      "description": "Represents a 'card' entity, comprising a PDF document and an associated cover image, uploaded by a user and displayed in a carousel.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Card entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the UserProfile who uploaded this card. (Relationship: UserProfile 1:N Card)"
-        },
-        "title": {
-          "type": "string",
-          "description": "A user-defined title or name for the card."
-        },
-        "pdfGoogleDriveFileId": {
-          "type": "string",
-          "description": "The Google Drive File ID for the PDF document associated with this card."
-        },
-        "coverImageGoogleDriveFileId": {
-          "type": "string",
-          "description": "The Google Drive File ID for the cover image associated with this card."
-        },
-        "uploadDate": {
-          "type": "string",
-          "description": "Timestamp when the card (PDF and cover image) was uploaded.",
-          "format": "date-time"
-        },
-        "carouselOrder": {
-          "type": "number",
-          "description": "An optional numerical value to determine the display order of the card within its carousel. Lower numbers appear first."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "title",
-        "pdfGoogleDriveFileId",
-        "coverImageGoogleDriveFileId",
-        "uploadDate"
-      ]
+        "coverImage": { "type": "string" },
+        "pdfDataUri": { "type": "string" },
+        "uploadedByUserId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
+    "providers": ["password"]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "UserProfile",
-          "schema": {
-            "$ref": "#/backend/entities/UserProfile"
-          },
-          "description": "Stores the profile information for each user. The document ID (`{userId}`) will correspond to the Firebase Authentication UID of the user. This document includes the Google Drive folder ID where the user's files are stored."
-        }
-      },
-      {
-        "path": "/users/{userId}/photos/{photoId}",
-        "definition": {
-          "entityName": "Photo",
-          "schema": {
-            "$ref": "#/backend/entities/Photo"
-          },
-          "description": "A subcollection for each user, storing metadata about their uploaded photos. The `{photoId}` is the document ID for an individual photo. Includes denormalized 'userId' field matching the parent path for authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns these photos, corresponding to their Firebase Authentication UID."
-            },
-            {
-              "name": "photoId",
-              "description": "The unique identifier for a specific photo document."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/cards/{cardId}",
-        "definition": {
-          "entityName": "Card",
-          "schema": {
-            "$ref": "#/backend/entities/Card"
-          },
-          "description": "A subcollection for each user, storing metadata about their uploaded cards (PDFs with cover images). The `{cardId}` is the document ID for an individual card. Includes denormalized 'userId' field matching the parent path for authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns these cards, corresponding to their Firebase Authentication UID."
-            },
-            {
-              "name": "cardId",
-              "description": "The unique identifier for a specific card document."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore structure is designed to be secure, scalable, and easily debuggable, prioritizing Authorization Independence and QAPs. All data is user-owned and private, simplifying security rules considerably.  Each user will have a dedicated document in the `/users` collection for their profile metadata, and two subcollections (`/photos` and `/cards`) to store metadata for their respective uploads.\n\n**Authorization Independence (CRITICAL):** This design achieves authorization independence by embedding the `userId` directly into the path for photos and cards (`/users/{userId}/photos/{photoId}` and `/users/{userId}/cards/{cardId}`). Furthermore, each `Photo` and `Card` document will explicitly contain a `userId` field. This denormalization means that security rules will not need to perform expensive and non-atomic `get()` operations on parent documents (e.g., `get(/users/$(userId))`) to determine ownership. Instead, rules can directly compare `request.auth.uid` with the `{userId}` wildcard in the path and the `userId` field within the document itself, ensuring atomic and efficient authorization checks.\n\n**QAPs (Rules are not Filters):** The structural segregation of user-owned data directly addresses QAPs for `list` operations. A user can only list their own photos and cards by querying the specific path for their `userId` (e.g., `db.collection('users').doc(request.auth.uid).collection('photos')`). Firestore security rules can then enforce that `request.auth.uid` matches the `{userId}` in the path, effectively preventing users from querying other users' data. Since all data within these subcollections belongs exclusively to the user specified in the path, there's no need for the database to filter results after a query, upholding the QAP principle."
+    "/photos/{photoId}": {
+      "schema": "Photo",
+      "description": "Colección raíz de fotografías compartidas."
+    },
+    "/cards/{cardId}": {
+      "schema": "Card",
+      "description": "Colección raíz de cartas y documentos PDF."
+    }
   }
 }
