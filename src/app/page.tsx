@@ -9,10 +9,11 @@ import { AuthModal } from '@/components/auth-modal';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
 import { useFirestore, useUser, useAuth, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, deleteDoc, doc, serverTimestamp, addDoc } from 'firebase/firestore';
+import { collection, query, orderBy, serverTimestamp, doc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, ShieldCheck, Heart } from 'lucide-react';
+import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function CarteBlanchePage() {
   const { toast } = useToast();
@@ -53,43 +54,32 @@ export default function CarteBlanchePage() {
     return () => observer.disconnect();
   }, [cards, photos]);
 
-  const addPhoto = async (url: string) => {
+  const addPhoto = (url: string) => {
     if (!isAdmin || !db) return;
-    try {
-      await addDoc(collection(db, 'photos'), {
-        url,
-        uploadedByUserId: user?.uid,
-        createdAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error(error);
-      toast({ variant: "destructive", title: "Error", description: "No se pudo guardar la referencia en la base de datos." });
-    }
+    // Uso de escritura no bloqueante para velocidad máxima
+    addDocumentNonBlocking(collection(db, 'photos'), {
+      url,
+      uploadedByUserId: user?.uid,
+      createdAt: serverTimestamp()
+    });
   };
   
-  const addCard = async (cover: string, pdf: string) => {
+  const addCard = (cover: string, pdf: string) => {
     if (!isAdmin || !db) return;
-    try {
-      await addDoc(collection(db, 'cards'), {
-        coverImage: cover,
-        pdfDataUri: pdf,
-        uploadedByUserId: user?.uid,
-        createdAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error(error);
-      toast({ variant: "destructive", title: "Error", description: "No se pudo archivar la carta." });
-    }
+    // Uso de escritura no bloqueante para velocidad máxima
+    addDocumentNonBlocking(collection(db, 'cards'), {
+      coverImage: cover,
+      pdfDataUri: pdf,
+      uploadedByUserId: user?.uid,
+      createdAt: serverTimestamp()
+    });
   };
 
-  const deleteCard = async (id: string) => {
+  const deleteCard = (id: string) => {
     if (!isAdmin || !db) return;
-    try {
-      await deleteDoc(doc(db, 'cards', id));
-      toast({ title: "Registro Removido", description: "La carta ha sido eliminada del archivo." });
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No tienes permisos para eliminar este registro." });
-    }
+    const cardRef = doc(db, 'cards', id);
+    deleteDocumentNonBlocking(cardRef);
+    toast({ title: "Registro Removido", description: "La carta ha sido eliminada del archivo." });
   };
 
   const handleSignOut = () => {

@@ -1,3 +1,4 @@
+
 # Carte Morgan - Guía de Configuración de Base de Datos y Almacenamiento
 
 Este proyecto utiliza **Firebase Firestore** para datos en tiempo real y **Firebase Storage** para archivos multimedia, asegurando que tus recuerdos se mantengan "para siempre" en la infraestructura de Google.
