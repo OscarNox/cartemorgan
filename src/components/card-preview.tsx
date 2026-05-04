@@ -31,9 +31,14 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete, isAdmin }: C
       setIsLoading(true);
       try {
         const result = await generatePdfHighlights({ pdfDataUri });
-        setHighlights(result.highlights);
+        if (result && result.highlights) {
+          setHighlights(result.highlights);
+        } else {
+          throw new Error("Respuesta vacía de la IA");
+        }
       } catch (error) {
-        setHighlights("No pudimos extraer la esencia de esta carta en este momento. Inténtalo de nuevo más tarde.");
+        console.error("Error al generar la esencia en producción:", error);
+        setHighlights("No pudimos extraer la esencia de esta carta en este momento. Revisa la configuración de la API Key en Netlify.");
       } finally {
         setIsLoading(false);
       }
