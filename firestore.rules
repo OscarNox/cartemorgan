@@ -4,28 +4,104 @@ service cloud.firestore {
 
     /**
      * CORE PHILOSOPHY:
-     * Solo el usuario administrador (aidaluxmorgan@gmail.com) tiene permisos de escritura.
-     * El resto de los usuarios solo pueden leer el contenido (espectadores).
+     * This ruleset enforces a strict user-ownership model designed for privacy and data integrity. 
+     * Every piece of data—profiles, photos, and cards—is siloed within a user's specific path 
+     * based on their Firebase Authentication UID.
+     *
+     * DATA STRUCTURE:
+     * All data is organized hierarchically: /users/{userId} contains profile info, 
+     * and its subcollections (/photos, /cards) contain metadata for files stored in Google Drive.
+     *
+     * KEY SECURITY DECISIONS:
+     * 1. Strict Ownership: Users can only read or write data where the path {userId} matches their Auth UID.
+     * 2. No Public Access: There are no public collections. All access requires a verified identity.
+     * 3. Relational Integrity: During creation, we force internal 'userId' fields to match the 
+     *    document path to prevent data spoofing.
+     * 4. Google Drive Integration: Since actual files are in Google Drive, these rules protect the 
+     *    metadata (File IDs) that allows the app to link to those external assets.
+     *
+     * DENORMALIZATION FOR AUTHORIZATION:
+     * To maximize performance and maintain "Authorization Independence," the 'userId' is 
+     * denormalized into every document. This allows rules to check ownership using only 
+     * the path variables and the document itself, avoiding expensive get() calls to 
+     * parent documents.
      */
 
-    function isAdmin() {
-      return request.auth != null && request.auth.token.email == "aidaluxmorgan@gmail.com";
+    // --- Global Helper Functions ---
+
+    /** Checks if the request is from a signed-in user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the user is the owner of the resource based on the path UID. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** Verifies ownership and ensures the document exists for state-changing operations. */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
     }
 
     // --- Collection Rules ---
 
+    /**
+     * @description Rules for the top-level user profile document. Allows users to manage their own profile and Google Drive folder reference.
+     * @path /users/{userId}
+     * @allow (get, create) If request.auth.uid matches {userId}.
+     * @deny (list) Listing users is generally restricted to prevent data harvesting.
+     * @principle Ownership (Self-Creation and Immutable ID).
+     */
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
+      allow get: if isOwner(userId);
+      allow list: if false; // Users should not be able to list other user profiles.
+      
+      // On create, ensure the internal ID matches the document ID and the user's UID.
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      
+      // On update, ensure ownership and that the ID field never changes.
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      
+      allow delete: if isExistingOwner(userId);
 
-    match /photos/{photoId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
+      /**
+       * @description Metadata for photos stored in the user's Google Drive.
+       * @path /users/{userId}/photos/{photoId}
+       * @allow (create) If userId field in data matches the {userId} path variable.
+       * @deny (update) If attempt is made to change the owner of the photo.
+       * @principle Relational Integrity and Ownership.
+       */
+      match /photos/{photoId} {
+        allow get, list: if isOwner(userId);
+        
+        // Ensure the creator sets the userId field correctly to match the path.
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        
+        // Ensure the userId field remains immutable during updates.
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        
+        allow delete: if isExistingOwner(userId);
+      }
 
-    match /cards/{cardId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      /**
+       * @description Metadata for cards (PDF + Cover) stored in the user's Google Drive.
+       * @path /users/{userId}/cards/{cardId}
+       * @allow (list) User can list their own cards.
+       * @deny (get) If the requester is not the user identified in the path.
+       * @principle Path-based authorization and ownership.
+       */
+      match /cards/{cardId} {
+        allow get, list: if isOwner(userId);
+        
+        // Validate relational consistency on creation.
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        
+        // Prevent ownership transfer by making userId immutable.
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        
+        allow delete: if isExistingOwner(userId);
+      }
     }
   }
 }
