@@ -1,7 +1,6 @@
-
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { PhotoCarousel } from '@/components/photo-carousel';
 import { CardPreview } from '@/components/card-preview';
 import { UploadSection } from '@/components/upload-section';
@@ -9,65 +8,32 @@ import { AuthModal } from '@/components/auth-modal';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { useFirestore, useUser, useAuth } from '@/firebase';
-import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { useFirestore, useUser, useAuth, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, deleteDoc, doc, serverTimestamp, addDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, ShieldCheck } from 'lucide-react';
-
-interface CardData {
-  id: string;
-  coverImage: string;
-  pdfDataUri: string;
-  uploadedByUserId: string;
-  createdAt: any;
-}
-
-interface PhotoData {
-  id: string;
-  url: string;
-  uploadedByUserId: string;
-  createdAt: any;
-}
 
 export default function CarteBlanchePage() {
   const { toast } = useToast();
   const db = useFirestore();
   const auth = useAuth();
   const { user } = useUser();
-  const [photos, setPhotos] = useState<PhotoData[]>([]);
-  const [cards, setCards] = useState<CardData[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const isAdmin = user?.email === 'aidaluxmorgan@gmail.com';
 
-  useEffect(() => {
-    if (!db) return;
-
-    const qPhotos = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
-    const unsubscribePhotos = onSnapshot(qPhotos, (snapshot) => {
-      const fetchedPhotos = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as PhotoData[];
-      setPhotos(fetchedPhotos);
-    });
-
-    const qCards = query(collection(db, 'cards'), orderBy('createdAt', 'desc'));
-    const unsubscribeCards = onSnapshot(qCards, (snapshot) => {
-      const fetchedCards = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as CardData[];
-      setCards(fetchedCards);
-      setLoading(false);
-    });
-
-    return () => {
-      unsubscribePhotos();
-      unsubscribeCards();
-    };
+  const photosQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
   }, [db]);
+
+  const cardsQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'cards'), orderBy('createdAt', 'desc'));
+  }, [db]);
+
+  const { data: photos, isLoading: photosLoading } = useCollection(photosQuery);
+  const { data: cards, isLoading: cardsLoading } = useCollection(cardsQuery);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -84,84 +50,38 @@ export default function CarteBlanchePage() {
 
   const addPhoto = async (url: string) => {
     if (!isAdmin || !db) return;
-    try {
-      await addDoc(collection(db, 'photos'), {
-        url,
-        uploadedByUserId: user?.uid,
-        createdAt: serverTimestamp()
-      });
-      toast({
-        title: "Imagen Añadida",
-        description: "Tu fotografía ha sido guardada en la galería eterna."
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No tienes permisos para subir fotos."
-      });
-    }
+    addDoc(collection(db, 'photos'), {
+      url,
+      uploadedByUserId: user?.uid,
+      createdAt: serverTimestamp()
+    });
+    toast({ title: "Imagen Añadida", description: "Tu fotografía ha sido guardada en la galería eterna." });
   };
   
   const addCard = async (cover: string, pdf: string) => {
     if (!isAdmin || !db) return;
-    try {
-      if (pdf.length > 850000) {
-        toast({
-          variant: "destructive",
-          title: "Documento muy pesado",
-          description: "El PDF supera el límite de guardado."
-        });
-        return;
-      }
-
-      await addDoc(collection(db, 'cards'), {
-        coverImage: cover,
-        pdfDataUri: pdf,
-        uploadedByUserId: user?.uid,
-        createdAt: serverTimestamp()
-      });
-      toast({
-        title: "Carta Archivada",
-        description: "Tu nuevo suspiro ha sido guardado permanentemente."
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No tienes permisos para subir cartas."
-      });
-    }
+    addDoc(collection(db, 'cards'), {
+      coverImage: cover,
+      pdfDataUri: pdf,
+      uploadedByUserId: user?.uid,
+      createdAt: serverTimestamp()
+    });
+    toast({ title: "Carta Archivada", description: "Tu nuevo suspiro ha sido guardado permanentemente." });
   };
 
-  const deleteCard = async (id: string) => {
+  const deleteCard = (id: string) => {
     if (!isAdmin || !db) return;
-    try {
-      await deleteDoc(doc(db, 'cards', id));
-      toast({
-        title: "Registro Removido",
-        description: "La carta ha sido eliminada del archivo."
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Acción no permitida."
-      });
-    }
+    deleteDoc(doc(db, 'cards', id));
+    toast({ title: "Registro Removido", description: "La carta ha sido eliminada del archivo." });
   };
 
   const handleSignOut = () => {
     signOut(auth);
-    toast({
-      title: "Sesión Cerrada",
-      description: "Has vuelto al modo espectador."
-    });
+    toast({ title: "Sesión Cerrada", description: "Has vuelto al modo espectador." });
   };
 
   return (
     <div className="min-h-screen botanical-pattern relative overflow-hidden selection:bg-primary/20">
-      
       <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-40 mix-blend-difference">
         <div className="pointer-events-auto">
           <h1 className="font-headline text-2xl md:text-3xl text-white tracking-tighter">Carte Morgan.</h1>
@@ -178,37 +98,21 @@ export default function CarteBlanchePage() {
                 </span>
                 <span className="text-[8px] text-white/40 uppercase tracking-tighter">{user.email}</span>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleSignOut}
-                className="text-white hover:bg-white/10 rounded-none h-10 w-10"
-              >
+              <Button variant="ghost" size="icon" onClick={handleSignOut} className="text-white hover:bg-white/10 rounded-none h-10 w-10">
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>
           )}
-          <div className="vertical-label hidden sm:block ml-4">
-            <span className="text-[10px] uppercase tracking-[0.4em] text-white/40">Memorias Sincronizadas</span>
-          </div>
         </div>
       </nav>
 
       <section className="relative min-h-screen flex items-center justify-center px-6 py-20 bg-white overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="w-full h-full botanical-pattern" />
-        </div>
-        
         <div className="relative z-10 max-w-4xl text-center space-y-8 md:space-y-12 scroll-reveal">
           <div className="space-y-4">
             <span className="text-[10px] md:text-xs font-body tracking-[0.5em] uppercase text-primary mb-4 block">Nuestra Antología Personal</span>
             <h2 className="text-5xl sm:text-7xl md:text-9xl font-headline leading-tight md:leading-none text-foreground">
-              Cada <br /> 
-              <span className="italic sm:pl-12 text-primary">Suspiro.</span>
+              Cada <br /> <span className="italic sm:pl-12 text-primary">Suspiro.</span>
             </h2>
-          </div>
-          <div className="flex justify-center">
-             <div className="w-px bg-primary/20 h-16 md:h-24" />
           </div>
           <p className="max-w-md mx-auto font-body text-sm md:text-base text-muted-foreground leading-loose px-4">
             Un rincón sagrado para nuestras palabras y memorias. 
@@ -223,32 +127,18 @@ export default function CarteBlanchePage() {
             <h3 className="font-headline text-3xl md:text-4xl">Galería Visual</h3>
             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-2">Nuestros momentos en píxeles</p>
           </div>
-          <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-primary">RT Sincronizado</span>
         </div>
-        <PhotoCarousel photos={photos.map(p => p.url)} />
+        <PhotoCarousel photos={photos?.map(p => p.url) || []} />
       </section>
 
       <section className="py-20 md:py-32 bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-24">
-          
           <div className="md:col-span-5 lg:col-span-4 space-y-8 md:space-y-12 scroll-reveal">
-            <div className="space-y-4">
-              <h3 className="font-headline text-4xl md:text-5xl leading-tight">Baúl de <br />Cartas</h3>
-              <p className="font-body text-sm md:text-base text-muted-foreground leading-relaxed">
-                Cada carta subida es analizada para extraer la esencia emocional. 
-                Tus datos están protegidos y sincronizados para siempre.
-              </p>
-            </div>
-            
+            <h3 className="font-headline text-4xl md:text-5xl leading-tight">Baúl de <br />Cartas</h3>
             <div className="p-8 border border-primary/10 bg-primary/[0.02] space-y-6">
-              <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Estado del Archivo</p>
-                <p className="text-[11px] italic text-muted-foreground">Persistencia en tiempo real activada.</p>
-              </div>
-              <Separator className="bg-primary/10" />
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-headline">{cards.length}</p>
+                  <p className="text-2xl font-headline">{cards?.length || 0}</p>
                   <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Documentos</p>
                 </div>
                 <div>
@@ -260,22 +150,17 @@ export default function CarteBlanchePage() {
           </div>
 
           <div className="md:col-span-7 lg:col-span-8 scroll-reveal">
-            {loading ? (
+            {!cards || cardsLoading ? (
               <div className="h-[400px] flex items-center justify-center">
                 <p className="font-headline text-xl animate-pulse text-primary">Consultando la nube...</p>
               </div>
             ) : cards.length === 0 ? (
               <div className="h-[400px] border border-dashed border-primary/20 flex flex-col items-center justify-center text-muted-foreground space-y-6 px-10 text-center">
                 <p className="font-headline text-2xl">El archivo está listo</p>
-                <p className="text-[10px] uppercase tracking-[0.2em] leading-loose">
-                  Usa el botón flotante para empezar a guardar memorias.
-                </p>
+                <p className="text-[10px] uppercase tracking-[0.2em]">Usa el botón flotante para empezar a guardar memorias.</p>
               </div>
             ) : (
-              <Carousel 
-                opts={{ align: "start", loop: cards.length > 1 }}
-                className="w-full"
-              >
+              <Carousel opts={{ align: "start" }} className="w-full">
                 <CarouselContent className="-ml-4 md:-ml-8">
                   {cards.map((card) => (
                     <CarouselItem key={card.id} className="pl-4 md:pl-8 basis-full sm:basis-1/2">
@@ -300,36 +185,15 @@ export default function CarteBlanchePage() {
         </div>
       </section>
 
-      <footer className="py-20 bg-foreground text-white/80">
-        <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-16">
-          <div className="space-y-6">
-            <h4 className="font-headline text-3xl text-white">Carte Morgan.</h4>
-            <p className="text-xs leading-loose font-light max-w-xs">
-              Un refugio digital potenciado por Firebase y Gemini AI. Guardado para siempre.
-            </p>
-          </div>
-          <div className="space-y-6">
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Sistema</p>
-            <ul className="space-y-3 text-xs">
-              <li className="hover:text-primary transition-colors cursor-pointer">Seguridad</li>
-              <li className="hover:text-primary transition-colors cursor-pointer">Privacidad</li>
-            </ul>
-          </div>
-          <div className="space-y-6">
-            <p className="text-[10px] uppercase tracking-widest text-white/40">Estado</p>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <p className="text-xs italic">Sincronización activa.</p>
-            </div>
-          </div>
+      <footer className="py-20 bg-foreground text-white/80 text-center">
+        <h4 className="font-headline text-3xl text-white mb-4">Carte Morgan.</h4>
+        <div className="flex items-center justify-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <p className="text-xs italic">Sincronización activa con Google Cloud.</p>
         </div>
       </footer>
 
-      {!user ? (
-        <AuthModal />
-      ) : (
-        isAdmin && <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />
-      )}
+      {!user ? <AuthModal /> : isAdmin && <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />}
     </div>
   );
 }
