@@ -1,12 +1,12 @@
+
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PhotoCarousel } from '@/components/photo-carousel';
 import { CardPreview } from '@/components/card-preview';
 import { UploadSection } from '@/components/upload-section';
 import { AuthModal } from '@/components/auth-modal';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { useFirestore, useUser, useAuth, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, deleteDoc, doc, serverTimestamp, addDoc } from 'firebase/firestore';
@@ -19,6 +19,12 @@ export default function CarteBlanchePage() {
   const db = useFirestore();
   const auth = useAuth();
   const { user } = useUser();
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  // Evitar error de hidratación con la fecha
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   const isAdmin = user?.email === 'aidaluxmorgan@gmail.com';
 
@@ -50,29 +56,41 @@ export default function CarteBlanchePage() {
 
   const addPhoto = async (url: string) => {
     if (!isAdmin || !db) return;
-    addDoc(collection(db, 'photos'), {
-      url,
-      uploadedByUserId: user?.uid,
-      createdAt: serverTimestamp()
-    });
-    toast({ title: "Imagen Añadida", description: "Tu fotografía ha sido guardada en la galería eterna." });
+    try {
+      await addDoc(collection(db, 'photos'), {
+        url,
+        uploadedByUserId: user?.uid,
+        createdAt: serverTimestamp()
+      });
+      toast({ title: "Imagen Añadida", description: "Tu fotografía ha sido guardada en la galería eterna." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo guardar la referencia en la base de datos." });
+    }
   };
   
   const addCard = async (cover: string, pdf: string) => {
     if (!isAdmin || !db) return;
-    addDoc(collection(db, 'cards'), {
-      coverImage: cover,
-      pdfDataUri: pdf,
-      uploadedByUserId: user?.uid,
-      createdAt: serverTimestamp()
-    });
-    toast({ title: "Carta Archivada", description: "Tu nuevo suspiro ha sido guardado permanentemente." });
+    try {
+      await addDoc(collection(db, 'cards'), {
+        coverImage: cover,
+        pdfDataUri: pdf,
+        uploadedByUserId: user?.uid,
+        createdAt: serverTimestamp()
+      });
+      toast({ title: "Carta Archivada", description: "Tu nuevo suspiro ha sido guardado permanentemente." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo archivar la carta." });
+    }
   };
 
-  const deleteCard = (id: string) => {
+  const deleteCard = async (id: string) => {
     if (!isAdmin || !db) return;
-    deleteDoc(doc(db, 'cards', id));
-    toast({ title: "Registro Removido", description: "La carta ha sido eliminada del archivo." });
+    try {
+      await deleteDoc(doc(db, 'cards', id));
+      toast({ title: "Registro Removido", description: "La carta ha sido eliminada del archivo." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "No tienes permisos para eliminar este registro." });
+    }
   };
 
   const handleSignOut = () => {
@@ -201,7 +219,9 @@ export default function CarteBlanchePage() {
             </p>
             <div className="flex items-center gap-3 px-6 py-2 border border-primary/10 bg-primary/[0.02]">
                <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-               <p className="text-[9px] uppercase tracking-widest text-primary/60 font-bold">Archivo Digital Protegido • {new Date().getFullYear()}</p>
+               <p className="text-[9px] uppercase tracking-widest text-primary/60 font-bold">
+                 Archivo Digital Protegido • {currentYear}
+               </p>
             </div>
           </div>
         </div>

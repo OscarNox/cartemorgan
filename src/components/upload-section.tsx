@@ -1,8 +1,9 @@
+
 "use client";
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera, FileUp, Plus, Trash2, Heart, Loader2 } from 'lucide-react';
+import { Camera, FileUp, Plus, Heart, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -45,7 +46,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       setPhotoFile(null);
       setIsOpen(false);
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo subir la imagen." });
+      toast({ variant: "destructive", title: "Error de Carga", description: "No se pudo subir la imagen a la nube." });
     } finally {
       setIsUploading(false);
     }
@@ -62,7 +63,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       setPdfFile(null);
       setIsOpen(false);
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo subir la carta." });
+      toast({ variant: "destructive", title: "Error de Carga", description: "Hubo un problema al subir la carta o su portada." });
     } finally {
       setIsUploading(false);
     }
