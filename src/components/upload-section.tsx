@@ -44,7 +44,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       return url;
     } catch (error: any) {
       console.error("Error en Storage:", error);
-      throw new Error(error.message || "Error al subir archivo.");
+      throw error;
     }
   };
 
@@ -58,10 +58,11 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       setIsOpen(false);
       toast({ title: "¡Éxito!", description: "La fotografía se ha guardado eternamente." });
     } catch (error: any) {
+      console.error(error);
       toast({ 
         variant: "destructive", 
         title: "Error de Carga", 
-        description: "Asegúrate de tener permisos y que el archivo no sea demasiado pesado." 
+        description: "No se pudo subir la imagen. Revisa los permisos de almacenamiento." 
       });
     } finally {
       setIsUploading(false);
@@ -72,18 +73,23 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
     if (!cardCoverFile || !pdfFile) return;
     setIsUploading(true);
     try {
-      const coverUrl = await uploadToStorage(cardCoverFile, 'covers');
-      const pdfUrl = await uploadToStorage(pdfFile, 'pdfs');
+      // Subidas en paralelo para mayor velocidad
+      const [coverUrl, pdfUrl] = await Promise.all([
+        uploadToStorage(cardCoverFile, 'covers'),
+        uploadToStorage(pdfFile, 'pdfs')
+      ]);
+      
       onCardUpload(coverUrl, pdfUrl);
       setCardCoverFile(null);
       setPdfFile(null);
       setIsOpen(false);
       toast({ title: "¡Carta Archivada!", description: "Tu mensaje ha sido guardado en el baúl." });
     } catch (error: any) {
+      console.error(error);
       toast({ 
         variant: "destructive", 
         title: "Error de Carga", 
-        description: "Hubo un problema al subir los documentos. Revisa tu conexión." 
+        description: "Hubo un problema al subir los documentos. Asegúrate de estar conectada." 
       });
     } finally {
       setIsUploading(false);
