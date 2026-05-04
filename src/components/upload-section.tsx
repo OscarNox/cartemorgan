@@ -31,15 +31,21 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
     if (file) setter(file);
   };
 
+  /**
+   * Sube un archivo a Firebase Storage.
+   * Optimizado para velocidad usando uploadBytes directamente.
+   */
   const uploadToStorage = async (file: File, path: string) => {
     if (!storage) throw new Error("El servicio de almacenamiento no está listo.");
     
-    // Crear una referencia única para evitar sobrescribir archivos
+    // Crear una referencia única para evitar colisiones
     const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
     const storageRef = ref(storage, `${path}/${fileName}`);
     
     try {
+      // Subida directa por stream de bytes
       const snapshot = await uploadBytes(storageRef, file);
+      // Obtención inmediata de la URL pública
       const url = await getDownloadURL(snapshot.ref);
       return url;
     } catch (error: any) {
@@ -56,13 +62,13 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       onPhotoUpload(url);
       setPhotoFile(null);
       setIsOpen(false);
-      toast({ title: "¡Éxito!", description: "La fotografía se ha guardado eternamente." });
+      toast({ title: "¡Fotografía Guardada!", description: "Se ha añadido a vuestra antología visual." });
     } catch (error: any) {
       console.error(error);
       toast({ 
         variant: "destructive", 
         title: "Error de Carga", 
-        description: "No se pudo subir la imagen. Revisa los permisos de almacenamiento." 
+        description: "No se pudo subir la imagen. Verifica tu conexión e inténtalo de nuevo." 
       });
     } finally {
       setIsUploading(false);
@@ -73,7 +79,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
     if (!cardCoverFile || !pdfFile) return;
     setIsUploading(true);
     try {
-      // Subidas en paralelo para mayor velocidad
+      // PROCESO RÁPIDO: Subimos ambos archivos en paralelo para ahorrar tiempo
       const [coverUrl, pdfUrl] = await Promise.all([
         uploadToStorage(cardCoverFile, 'covers'),
         uploadToStorage(pdfFile, 'pdfs')
@@ -83,13 +89,13 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       setCardCoverFile(null);
       setPdfFile(null);
       setIsOpen(false);
-      toast({ title: "¡Carta Archivada!", description: "Tu mensaje ha sido guardado en el baúl." });
+      toast({ title: "¡Carta Archivada!", description: "Vuestro mensaje ya es eterno en la nube." });
     } catch (error: any) {
       console.error(error);
       toast({ 
         variant: "destructive", 
         title: "Error de Carga", 
-        description: "Hubo un problema al subir los documentos. Asegúrate de estar conectada." 
+        description: "Hubo un problema al archivar los documentos." 
       });
     } finally {
       setIsUploading(false);
@@ -113,7 +119,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               <Heart className="w-4 h-4 text-primary fill-primary" />
               <DialogTitle className="font-headline text-2xl">Añadir Recuerdo</DialogTitle>
             </div>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Almacenamiento Seguro en Google Cloud</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Sincronización instantánea con Google Cloud</p>
           </DialogHeader>
         </div>
         
