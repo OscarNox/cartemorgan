@@ -18,8 +18,8 @@ export function initializeFirebase() {
       // Fallback al objeto de configuración manual con corrección de bucket
       const config = {
         ...firebaseConfig,
-        // Aseguramos que el bucket de almacenamiento esté presente
-        storageBucket: (firebaseConfig as any).storageBucket || `${firebaseConfig.projectId}.appspot.com`
+        // Aseguramos que el bucket de almacenamiento esté presente con los formatos estándar de Google Cloud
+        storageBucket: (firebaseConfig as any).storageBucket || `${firebaseConfig.projectId}.firebasestorage.app` || `${firebaseConfig.projectId}.appspot.com`
       };
       firebaseApp = initializeApp(config);
     }

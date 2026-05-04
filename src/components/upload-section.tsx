@@ -33,7 +33,9 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
 
   const uploadToStorage = async (file: File, path: string) => {
     if (!storage) throw new Error("El servicio de almacenamiento no está listo.");
-    const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+    // Limpieza básica del nombre del archivo para evitar errores de caracteres especiales
+    const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+    const fileName = `${Date.now()}-${safeName}`;
     const storageRef = ref(storage, `${path}/${fileName}`);
     const snapshot = await uploadBytes(storageRef, file);
     return await getDownloadURL(snapshot.ref);
@@ -49,7 +51,12 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       setIsOpen(false);
       toast({ title: "¡Fotografía Guardada!", description: "Se ha añadido a vuestra antología visual." });
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: "No se pudo subir la imagen." });
+      console.error(error);
+      toast({ 
+        variant: "destructive", 
+        title: "Error de Subida", 
+        description: "Asegúrate de tener conexión y permisos de administrador." 
+      });
     } finally {
       setIsUploading(false);
     }
@@ -59,6 +66,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
     if (!cardCoverFile || !pdfFile) return;
     setIsUploading(true);
     try {
+      // Carga en paralelo para mayor velocidad
       const [coverUrl, pdfUrl] = await Promise.all([
         uploadToStorage(cardCoverFile, 'covers'),
         uploadToStorage(pdfFile, 'pdfs')
@@ -69,7 +77,12 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       setIsOpen(false);
       toast({ title: "¡Carta Archivada!", description: "Vuestro mensaje ya es eterno." });
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: "Fallo al archivar documentos." });
+      console.error(error);
+      toast({ 
+        variant: "destructive", 
+        title: "Error de Archivo", 
+        description: "No se pudieron subir los documentos. Revisa el tamaño del PDF." 
+      });
     } finally {
       setIsUploading(false);
     }
