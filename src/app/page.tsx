@@ -25,7 +25,7 @@ export default function CarteBlanchePage() {
     setCurrentYear(new Date().getFullYear());
   }, []);
 
-  const isAdmin = user?.email?.toLowerCase() === 'aidaluxmorgan@gmail.com';
+  const isAdmin = user?.email?.toLowerCase() === 'aidaluxmorgan@gmail.com' || user?.email?.toLowerCase() === 'aidaluxmorgan';
 
   const photosQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -61,7 +61,6 @@ export default function CarteBlanchePage() {
         uploadedByUserId: user?.uid,
         createdAt: serverTimestamp()
       });
-      toast({ title: "Imagen Añadida", description: "Tu fotografía ha sido guardada en la galería eterna." });
     } catch (error) {
       console.error(error);
       toast({ variant: "destructive", title: "Error", description: "No se pudo guardar la referencia en la base de datos." });
@@ -77,7 +76,6 @@ export default function CarteBlanchePage() {
         uploadedByUserId: user?.uid,
         createdAt: serverTimestamp()
       });
-      toast({ title: "Carta Archivada", description: "Tu nuevo suspiro ha sido guardado permanentemente." });
     } catch (error) {
       console.error(error);
       toast({ variant: "destructive", title: "Error", description: "No se pudo archivar la carta." });
@@ -104,7 +102,7 @@ export default function CarteBlanchePage() {
       <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-40 mix-blend-difference">
         <div className="pointer-events-auto">
           <h1 className="font-headline text-2xl md:text-3xl text-white tracking-tighter">Carte Morgan.</h1>
-          <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/60">Archivo de Momentos Eternos</p>
+          <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.4em] text-white/60">Momentos Eternos</p>
         </div>
         
         <div className="flex items-center gap-4 pointer-events-auto">
@@ -128,14 +126,15 @@ export default function CarteBlanchePage() {
       <section className="relative min-h-screen flex items-center justify-center px-6 py-20 bg-white overflow-hidden">
         <div className="relative z-10 max-w-4xl text-center space-y-8 md:space-y-12 scroll-reveal">
           <div className="space-y-4">
-            <span className="text-[10px] md:text-xs font-body tracking-[0.5em] uppercase text-primary mb-4 block">Nuestra Antología Personal</span>
+            <span className="text-[10px] md:text-xs font-body tracking-[0.5em] uppercase text-primary mb-4 block">NUESTRA PROPIA ANTOLOGÍA</span>
             <h2 className="text-5xl sm:text-7xl md:text-9xl font-headline leading-tight md:leading-none text-foreground">
-              Cada <br /> <span className="italic sm:pl-12 text-primary">Suspiro.</span>
+              NUESTROS <br /> <span className="italic sm:pl-12 text-primary">MOMENTOS</span>
             </h2>
           </div>
           <p className="max-w-md mx-auto font-body text-sm md:text-base text-muted-foreground leading-loose px-4">
-            Un rincón sagrado para nuestras palabras y memorias. 
-            {isAdmin ? " Control total activado." : " Disfruta de nuestra historia."}
+            Mientras nuestras almas respiren, la mía siempre encontrará el camino para llegar a ti.
+             Incluso en los días donde los ojos no puedan ver donde estas, siempre sabré dóndo está el camino. 
+             Cada vez que quieras sentir lo que dentro de mi corazón, tendrás esta llave para entrar cuando desees.
           </p>
         </div>
       </section>
@@ -229,7 +228,17 @@ export default function CarteBlanchePage() {
         <div className="absolute top-0 left-0 w-full h-full botanical-pattern opacity-[0.03] pointer-events-none" />
       </footer>
 
-      {!user ? <AuthModal /> : isAdmin ? <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} /> : <AuthModal />}
+      {!user ? (
+        <AuthModal />
+      ) : isAdmin ? (
+        <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />
+      ) : (
+        <div className="fixed bottom-8 right-8 z-50">
+          <Button variant="outline" onClick={handleSignOut} className="rounded-full shadow-lg bg-white">
+            Salir (Espectador)
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

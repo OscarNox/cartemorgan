@@ -8,7 +8,10 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.email.lower() == 'aidaluxmorgan@gmail.com';
+      // Verificación estricta del email de administración
+      return isSignedIn() && 
+        (request.auth.token.email.lower() == 'aidaluxmorgan@gmail.com' || 
+         request.auth.token.email.lower() == 'aidaluxmorgan');
     }
 
     match /photos/{photoId} {

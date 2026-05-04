@@ -1,3 +1,4 @@
+
 'use client';
 
 import { firebaseConfig } from '@/firebase/config';
@@ -11,12 +12,16 @@ export function initializeFirebase() {
   if (!getApps().length) {
     let firebaseApp;
     try {
+      // Intentamos inicialización automática (entorno Studio)
       firebaseApp = initializeApp();
     } catch (e) {
-      if (process.env.NODE_ENV === "production") {
-        console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
-      }
-      firebaseApp = initializeApp(firebaseConfig);
+      // Fallback al objeto de configuración manual con corrección de bucket
+      const config = {
+        ...firebaseConfig,
+        // Aseguramos que el bucket de almacenamiento esté presente
+        storageBucket: (firebaseConfig as any).storageBucket || `${firebaseConfig.projectId}.appspot.com`
+      };
+      firebaseApp = initializeApp(config);
     }
 
     return getSdks(firebaseApp);
