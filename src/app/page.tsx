@@ -21,12 +21,11 @@ export default function CarteBlanchePage() {
   const { user } = useUser();
   const [currentYear, setCurrentYear] = useState<number | null>(null);
 
-  // Evitar error de hidratación con la fecha
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
   }, []);
 
-  const isAdmin = user?.email === 'aidaluxmorgan@gmail.com';
+  const isAdmin = user?.email?.toLowerCase() === 'aidaluxmorgan@gmail.com';
 
   const photosQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -64,6 +63,7 @@ export default function CarteBlanchePage() {
       });
       toast({ title: "Imagen Añadida", description: "Tu fotografía ha sido guardada en la galería eterna." });
     } catch (error) {
+      console.error(error);
       toast({ variant: "destructive", title: "Error", description: "No se pudo guardar la referencia en la base de datos." });
     }
   };
@@ -79,6 +79,7 @@ export default function CarteBlanchePage() {
       });
       toast({ title: "Carta Archivada", description: "Tu nuevo suspiro ha sido guardado permanentemente." });
     } catch (error) {
+      console.error(error);
       toast({ variant: "destructive", title: "Error", description: "No se pudo archivar la carta." });
     }
   };
@@ -175,7 +176,7 @@ export default function CarteBlanchePage() {
             ) : cards.length === 0 ? (
               <div className="h-[400px] border border-dashed border-primary/20 flex flex-col items-center justify-center text-muted-foreground space-y-6 px-10 text-center">
                 <p className="font-headline text-2xl">El archivo está listo</p>
-                <p className="text-[10px] uppercase tracking-[0.2em]">Usa el botón flotante para empezar a guardar memorias.</p>
+                <p className="text-[10px] uppercase tracking-[0.2em]">Accede para empezar a guardar memorias.</p>
               </div>
             ) : (
               <Carousel opts={{ align: "start" }} className="w-full">
@@ -228,7 +229,7 @@ export default function CarteBlanchePage() {
         <div className="absolute top-0 left-0 w-full h-full botanical-pattern opacity-[0.03] pointer-events-none" />
       </footer>
 
-      {!user ? <AuthModal /> : isAdmin && <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} />}
+      {!user ? <AuthModal /> : isAdmin ? <UploadSection onPhotoUpload={addPhoto} onCardUpload={addCard} /> : <AuthModal />}
     </div>
   );
 }

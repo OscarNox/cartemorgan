@@ -32,6 +32,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
   };
 
   const uploadToStorage = async (file: File, path: string) => {
+    if (!storage) throw new Error("Storage not initialized");
     const storageRef = ref(storage, `${path}/${Date.now()}-${file.name}`);
     await uploadBytes(storageRef, file);
     return getDownloadURL(storageRef);
@@ -46,7 +47,8 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       setPhotoFile(null);
       setIsOpen(false);
     } catch (error) {
-      toast({ variant: "destructive", title: "Error de Carga", description: "No se pudo subir la imagen a la nube." });
+      console.error(error);
+      toast({ variant: "destructive", title: "Error de Carga", description: "No se pudo subir la imagen. Verifica tu conexión." });
     } finally {
       setIsUploading(false);
     }
@@ -63,7 +65,8 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
       setPdfFile(null);
       setIsOpen(false);
     } catch (error) {
-      toast({ variant: "destructive", title: "Error de Carga", description: "Hubo un problema al subir la carta o su portada." });
+      console.error(error);
+      toast({ variant: "destructive", title: "Error de Carga", description: "Hubo un problema al subir la carta. El archivo podría ser muy grande." });
     } finally {
       setIsUploading(false);
     }
@@ -99,8 +102,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               <Input type="file" accept="image/*" onChange={(e) => handleFileChange(e, setPhotoFile)} className="border-primary/10 h-12 pt-3 rounded-none" />
               {photoFile && (
                 <Button onClick={submitPhoto} disabled={isUploading} className="w-full h-12 rounded-none">
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                  Subir a la Nube
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Subir a la Nube"}
                 </Button>
               )}
             </div>
@@ -123,8 +125,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               </div>
               {cardCoverFile && pdfFile && (
                 <Button onClick={submitCard} disabled={isUploading} className="w-full h-12 rounded-none">
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                  Guardar para siempre
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Guardar para siempre"}
                 </Button>
               )}
             </div>

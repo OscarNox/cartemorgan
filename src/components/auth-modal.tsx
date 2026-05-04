@@ -9,11 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useAuth } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Mail, Heart, User } from 'lucide-react';
+import { Lock, Mail, Heart } from 'lucide-react';
 
 export function AuthModal() {
   const [isOpen, setIsOpen] = useState(false);
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const auth = useAuth();
@@ -23,10 +23,16 @@ export function AuthModal() {
     e.preventDefault();
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // Normalizamos el identificador: si no tiene @, le añadimos @gmail.com para Firebase Auth
+      let loginEmail = identifier.toLowerCase().trim();
+      if (!loginEmail.includes('@')) {
+        loginEmail = `${loginEmail}@gmail.com`;
+      }
       
-      if (email === 'aidaluxmorgan@gmail.com') {
-        toast({ title: "Bienvenida, Aida", description: "Modo administrador activado." });
+      await signInWithEmailAndPassword(auth, loginEmail, password);
+      
+      if (loginEmail === 'aidaluxmorgan@gmail.com') {
+        toast({ title: "Bienvenida, Aida", description: "Control total activado." });
       } else {
         toast({ title: "Sesión iniciada", description: "Has accedido como espectador." });
       }
@@ -35,7 +41,7 @@ export function AuthModal() {
       toast({ 
         variant: "destructive", 
         title: "Error de Acceso", 
-        description: "Credenciales incorrectas." 
+        description: "Usuario o contraseña incorrectos." 
       });
     } finally {
       setLoading(false);
@@ -66,15 +72,15 @@ export function AuthModal() {
         <form onSubmit={handleAuth} className="p-8 space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Email</Label>
+              <Label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Usuario / Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 w-4 h-4 text-primary/40" />
                 <Input 
-                  type="email" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text" 
+                  value={identifier} 
+                  onChange={(e) => setIdentifier(e.target.value)}
                   className="pl-10 h-12 rounded-none border-primary/10 focus-visible:ring-primary/20" 
-                  placeholder="ejemplo@email.com"
+                  placeholder="aidaluxmorgan"
                   required
                 />
               </div>
@@ -100,7 +106,7 @@ export function AuthModal() {
           </Button>
 
           <p className="text-center text-[9px] uppercase tracking-widest text-muted-foreground leading-relaxed">
-            Solo el administrador tiene permisos de edición.
+            Ingresa 'aidaluxmorgan' para administrar el archivo.
           </p>
         </form>
       </DialogContent>
