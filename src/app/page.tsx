@@ -56,7 +56,6 @@ export default function CarteBlanchePage() {
 
   const addPhoto = (url: string) => {
     if (!isAdmin || !db) return;
-    // Uso de escritura no bloqueante para velocidad máxima
     addDocumentNonBlocking(collection(db, 'photos'), {
       url,
       uploadedByUserId: user?.uid,
@@ -66,7 +65,6 @@ export default function CarteBlanchePage() {
   
   const addCard = (cover: string, pdf: string) => {
     if (!isAdmin || !db) return;
-    // Uso de escritura no bloqueante para velocidad máxima
     addDocumentNonBlocking(collection(db, 'cards'), {
       coverImage: cover,
       pdfDataUri: pdf,

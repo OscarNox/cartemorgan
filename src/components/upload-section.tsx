@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useStorage } from '@/firebase';
 
 interface UploadSectionProps {
   onPhotoUpload: (url: string) => void;
@@ -22,37 +24,34 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
   const [isUploading, setIsUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  const storage = useStorage();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (f: File | null) => void) => {
     const file = e.target.files?.[0];
     if (file) setter(file);
   };
 
-  // Convierte un archivo a Data URI (Base64) para guardarlo "dentro" de la base de datos
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  const uploadFileToCloud = async (file: File, folder: string): Promise<string> => {
+    const storageRef = ref(storage, `${folder}/${Date.now()}-${file.name}`);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
   };
 
   const submitPhoto = async () => {
     if (!photoFile) return;
     setIsUploading(true);
     try {
-      // Guardado directo en el documento sin pasar por almacenamiento externo
-      const dataUri = await fileToDataUri(photoFile);
-      onPhotoUpload(dataUri);
+      const downloadUrl = await uploadFileToCloud(photoFile, 'photos');
+      onPhotoUpload(downloadUrl);
       setPhotoFile(null);
       setIsOpen(false);
-      toast({ title: "¡Guardado al Instante!", description: "La foto ya es parte de la página." });
+      toast({ title: "¡Fotografía Guardada!", description: "Se ha almacenado permanentemente en la nube." });
     } catch (error: any) {
+      console.error(error);
       toast({ 
         variant: "destructive", 
-        title: "Error de Guardado", 
-        description: "El archivo podría ser demasiado grande para el guardado directo." 
+        title: "Error de Subida", 
+        description: "No se pudo subir la imagen. Revisa tu conexión." 
       });
     } finally {
       setIsUploading(false);
@@ -63,21 +62,23 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
     if (!cardCoverFile || !pdfFile) return;
     setIsUploading(true);
     try {
-      // Convertimos ambos archivos a datos puros para que viajen juntos
-      const [coverUri, pdfUri] = await Promise.all([
-        fileToDataUri(cardCoverFile),
-        fileToDataUri(pdfFile)
+      // Subida en paralelo para máxima velocidad
+      const [coverUrl, pdfUrl] = await Promise.all([
+        uploadFileToCloud(cardCoverFile, 'covers'),
+        uploadFileToCloud(pdfFile, 'pdfs')
       ]);
-      onCardUpload(coverUri, pdfUri);
+      
+      onCardUpload(coverUrl, pdfUrl);
       setCardCoverFile(null);
       setPdfFile(null);
       setIsOpen(false);
-      toast({ title: "¡Memoria Integrada!", description: "La carta se ha guardado físicamente en el archivo." });
+      toast({ title: "¡Carta Editorial Integrada!", description: "Documento guardado con éxito." });
     } catch (error: any) {
+      console.error(error);
       toast({ 
         variant: "destructive", 
-        title: "Error de Guardado", 
-        description: "Asegúrate de que el PDF no sea excesivamente grande." 
+        title: "Error de Subida", 
+        description: "Hubo un problema al subir los archivos de la carta." 
       });
     } finally {
       setIsUploading(false);
@@ -101,7 +102,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               <Heart className="w-4 h-4 text-primary fill-primary" />
               <DialogTitle className="font-headline text-2xl">Añadir Recuerdo</DialogTitle>
             </div>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Guardado Directo en la Página</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Guardado Permanente en Google Cloud</p>
           </DialogHeader>
         </div>
         
@@ -117,7 +118,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               </div>
               {photoFile && (
                 <Button onClick={submitPhoto} disabled={isUploading} className="w-full h-12 rounded-none bg-primary hover:bg-primary/90 font-bold tracking-widest uppercase text-xs">
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Guardar en la Página"}
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Subir a la Nube"}
                 </Button>
               )}
             </div>
@@ -140,7 +141,7 @@ export function UploadSection({ onPhotoUpload, onCardUpload }: UploadSectionProp
               </div>
               {cardCoverFile && pdfFile && (
                 <Button onClick={submitCard} disabled={isUploading} className="w-full h-12 rounded-none bg-primary hover:bg-primary/90 font-bold tracking-widest uppercase text-xs">
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Integrar Documento"}
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Subir Documentos"}
                 </Button>
               )}
             </div>
