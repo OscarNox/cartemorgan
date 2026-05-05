@@ -130,8 +130,8 @@ export default function CarteBlanchePage() {
       <section className="py-16 md:py-24 space-y-8 md:space-y-12 bg-background/50 backdrop-blur-sm">
         <div className="px-6 md:px-8 flex flex-col md:flex-row justify-between items-start md:items-end max-w-7xl mx-auto scroll-reveal gap-4">
           <div>
-            <h3 className="font-headline text-3xl md:text-4xl">Galería Visual</h3>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-2">Nuestros momentos en píxeles</p>
+            <h3 className="font-headline text-3xl md:text-4xl">Nuestras Historias</h3>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-2">Nuestra esencia</p>
           </div>
         </div>
         <PhotoCarousel photos={photos?.map(p => p.url) || []} />
@@ -141,6 +141,11 @@ export default function CarteBlanchePage() {
         <div className="max-w-7xl mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-24">
           <div className="md:col-span-5 lg:col-span-4 space-y-8 md:space-y-12 scroll-reveal">
             <h3 className="font-headline text-4xl md:text-5xl leading-tight">Baúl de <br />Cartas</h3>
+            <p className="font-body text-sm md:text-base text-muted-foreground leading-relaxed">
+                Cada sentimiento, cada pensamiento y cada suspiro que tenemos es parte de lo que sentimos y amamos. 
+                Es importante dar valor a lo que amamos, por eso para que 
+                nuestra historia sea eterna tenemos que apreciarla.
+              </p>
             <div className="p-8 border border-primary/10 bg-primary/[0.02] space-y-6">
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
@@ -203,8 +208,17 @@ export default function CarteBlanchePage() {
           <div className="pt-8 flex flex-col items-center gap-6">
             <div className="w-px h-12 bg-primary/20" />
             <p className="max-w-xs mx-auto text-[11px] leading-relaxed text-muted-foreground italic font-body">
-              "Porque cada palabra escrita es un suspiro que el tiempo no podrá borrar."
+            Siempre que queramos dar un vistazo hacia atrás, aquí estaré, siempre...
             </p>
+            <div className="space-y-6">
+            <p className="text-[10px] uppercase tracking-widest text-pink/40">Conversaciones necesarias.</p>
+            <ul className="space-y-3 text-[11px] md:text-xs">
+            <li className="hover:text-primary transition-colors cursor-pointer">Querer hacer las cosas bien.</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">¿Que es lo que amas?.</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Lo que buscamos.</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">¿Esto es lo que siempre quise?</li>
+            </ul>
+          </div>
             <div className="flex items-center gap-3 px-6 py-2 border border-primary/10 bg-primary/[0.02]">
                <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
                <p className="text-[9px] uppercase tracking-widest text-primary/60 font-bold">
