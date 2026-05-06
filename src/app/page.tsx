@@ -150,7 +150,7 @@ export default function CarteBlanchePage() {
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-headline">{cards?.length || 0}</p>
-                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Documentos</p>
+                  <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Cartas</p>
                 </div>
                 <div>
                   <p className="text-2xl font-headline text-primary">ACT</p>
@@ -167,7 +167,7 @@ export default function CarteBlanchePage() {
               </div>
             ) : cards.length === 0 ? (
               <div className="h-[400px] border border-dashed border-primary/20 flex flex-col items-center justify-center text-muted-foreground space-y-6 px-10 text-center">
-                <p className="font-headline text-2xl">El archivo está listo</p>
+                <p className="font-headline text-2xl">Esperando una carta...</p>
                 <p className="text-[10px] uppercase tracking-[0.2em]">Accede para empezar a guardar memorias.</p>
               </div>
             ) : (
@@ -202,7 +202,7 @@ export default function CarteBlanchePage() {
             <Heart className="w-6 h-6 text-primary/40 animate-pulse" />
           </div>
           <div className="space-y-2">
-            <h4 className="font-headline text-4xl md:text-5xl text-foreground tracking-tighter">Carte Morgan.</h4>
+            <h4 className="font-headline text-4xl md:text-5xl text-foreground tracking-tighter">Carte Morgan</h4>
             <p className="text-[10px] uppercase tracking-[0.6em] text-primary font-bold">Nuestra Propia antología</p>
           </div>
           <div className="pt-8 flex flex-col items-center gap-6">
@@ -213,16 +213,16 @@ export default function CarteBlanchePage() {
             <div className="space-y-6">
             <p className="text-[10px] uppercase tracking-widest text-pink/40">Conversaciones necesarias.</p>
             <ul className="space-y-3 text-[11px] md:text-xs">
-            <li className="hover:text-primary transition-colors cursor-pointer">Querer hacer las cosas bien.</li>
-              <li className="hover:text-primary transition-colors cursor-pointer">¿Que es lo que amas?.</li>
-              <li className="hover:text-primary transition-colors cursor-pointer">Lo que buscamos.</li>
+            <li className="hover:text-primary transition-colors cursor-pointer">Querer hacer las cosas bien</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">¿Que es lo que amas?</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Lo que buscamos </li>
               <li className="hover:text-primary transition-colors cursor-pointer">¿Esto es lo que siempre quise?</li>
             </ul>
           </div>
             <div className="flex items-center gap-3 px-6 py-2 border border-primary/10 bg-primary/[0.02]">
                <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
                <p className="text-[9px] uppercase tracking-widest text-primary/60 font-bold">
-                 Archivo Digital Protegido • {currentYear}
+                 Los archivos estan protegidos • {currentYear}
                </p>
             </div>
           </div>
