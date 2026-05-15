@@ -14,6 +14,7 @@ import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { LogOut, ShieldCheck, Heart } from 'lucide-react';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { generatePdfHighlights } from '@/ai/flows/generate-pdf-highlights-flow';
 
 export default function CarteBlanchePage() {
   const { toast } = useToast();
@@ -63,21 +64,41 @@ export default function CarteBlanchePage() {
     });
   };
   
-  const addCard = (cover: string, pdf: string) => {
+  const addCard = async (cover: string, pdf: string) => {
     if (!isAdmin || !db) return;
-    addDocumentNonBlocking(collection(db, 'cards'), {
-      coverImage: cover,
-      pdfDataUri: pdf,
-      uploadedByUserId: user?.uid,
-      createdAt: serverTimestamp()
-    });
+    
+    // Generamos la esencia ANTES de guardar para que sea eterna
+    try {
+      const result = await generatePdfHighlights({ pdfDataUri: pdf });
+      const highlights = result?.highlights || "Esencia guardada en el archivo.";
+      
+      addDocumentNonBlocking(collection(db, 'cards'), {
+        coverImage: cover,
+        pdfDataUri: pdf,
+        highlights: highlights, // Guardado permanentemente
+        uploadedByUserId: user?.uid,
+        createdAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error("Error generando esencia al subir:", error);
+      // Guardamos sin esencia si falla la IA, se podrá generar después
+      addDocumentNonBlocking(collection(db, 'cards'), {
+        coverImage: cover,
+        pdfDataUri: pdf,
+        highlights: null,
+        uploadedByUserId: user?.uid,
+        createdAt: serverTimestamp()
+      });
+    }
   };
 
   const deleteCard = (id: string) => {
     if (!isAdmin || !db) return;
-    const cardRef = doc(db, 'cards', id);
-    deleteDocumentNonBlocking(cardRef);
-    toast({ title: "Registro Removido", description: "La carta ha sido eliminada del archivo." });
+    if (confirm("¿Estás segura de querer eliminar este recuerdo para siempre?")) {
+      const cardRef = doc(db, 'cards', id);
+      deleteDocumentNonBlocking(cardRef);
+      toast({ title: "Registro Removido", description: "La carta ha sido eliminada del archivo." });
+    }
   };
 
   const handleSignOut = () => {
@@ -179,6 +200,7 @@ export default function CarteBlanchePage() {
                         id={card.id}
                         coverImage={card.coverImage}
                         pdfDataUri={card.pdfDataUri}
+                        savedHighlights={card.highlights}
                         uploadedByUserId={card.uploadedByUserId}
                         onDelete={deleteCard}
                         isAdmin={isAdmin}
@@ -211,9 +233,9 @@ export default function CarteBlanchePage() {
             Siempre que queramos dar un vistazo hacia atrás, aquí estaré, siempre...
             </p>
             <div className="space-y-6">
-            <p className="text-[10px] uppercase tracking-widest text-pink/40">Conversaciones necesarias.</p>
+            <p className="text-[10px] uppercase tracking-widest text-primary/40">Conversaciones necesarias.</p>
             <ul className="space-y-3 text-[11px] md:text-xs">
-            <li className="hover:text-primary transition-colors cursor-pointer">Querer hacer las cosas bien</li>
+              <li className="hover:text-primary transition-colors cursor-pointer">Querer hacer las cosas bien</li>
               <li className="hover:text-primary transition-colors cursor-pointer">¿Que es lo que amas?</li>
               <li className="hover:text-primary transition-colors cursor-pointer">Lo que buscamos </li>
               <li className="hover:text-primary transition-colors cursor-pointer">¿Esto es lo que siempre quise?</li>

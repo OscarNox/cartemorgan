@@ -15,18 +15,20 @@ interface CardPreviewProps {
   id: string;
   coverImage: string;
   pdfDataUri: string;
+  savedHighlights?: string | null;
   uploadedByUserId: string;
   onDelete: (id: string) => void;
   isAdmin?: boolean;
 }
 
-export function CardPreview({ id, coverImage, pdfDataUri, onDelete, isAdmin }: CardPreviewProps) {
+export function CardPreview({ id, coverImage, pdfDataUri, savedHighlights, onDelete, isAdmin }: CardPreviewProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [highlights, setHighlights] = useState<string | null>(null);
+  const [highlights, setHighlights] = useState<string | null>(savedHighlights || null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handleReveal = async () => {
+    // Si ya tenemos la esencia guardada, no llamamos a la IA
     if (!highlights && !isLoading) {
       setIsLoading(true);
       try {
@@ -34,11 +36,11 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete, isAdmin }: C
         if (result && result.highlights) {
           setHighlights(result.highlights);
         } else {
-          throw new Error("Respuesta vacía de la IA");
+          throw new Error("Respuesta vacía");
         }
       } catch (error) {
-        console.error("Error al generar la esencia en producción:", error);
-        setHighlights("No pudimos extraer la esencia de esta carta en este momento. Revisa la configuración de la API Key en Netlify.");
+        console.error("Error al generar la esencia:", error);
+        setHighlights("No pudimos extraer la esencia. Revisa la configuración de API.");
       } finally {
         setIsLoading(false);
       }
@@ -46,7 +48,10 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete, isAdmin }: C
     setIsFlipped(true);
   };
 
-  const toggleFlipOnMobile = () => {
+  const toggleFlipOnMobile = (e: React.MouseEvent) => {
+    // Evitamos girar si se hace clic en el botón de borrar
+    if ((e.target as HTMLElement).closest('.no-flip')) return;
+    
     if (window.innerWidth < 768) {
       if (!isFlipped) handleReveal();
       else setIsFlipped(false);
@@ -82,17 +87,17 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete, isAdmin }: C
               </div>
 
               {isAdmin && (
-                <div className="absolute bottom-4 right-4 z-20 md:opacity-0 md:group-hover:opacity-100 transition-all">
+                <div className="absolute bottom-4 right-4 z-30 md:opacity-0 md:group-hover:opacity-100 transition-all no-flip">
                   <Button
                     variant="destructive"
                     size="icon"
-                    className="h-10 w-10 rounded-none bg-white text-destructive hover:bg-destructive hover:text-white border border-destructive/20 shadow-xl"
+                    className="h-10 w-10 rounded-none bg-white text-destructive hover:bg-destructive hover:text-white border border-destructive/20 shadow-xl no-flip"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(id);
                     }}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 no-flip" />
                   </Button>
                 </div>
               )}
@@ -115,12 +120,12 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete, isAdmin }: C
               <div className="flex items-center justify-between border-b border-primary/10 pb-4">
                 <div className="flex items-center gap-3">
                   <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary">Esencia de la Carta</span>
+                  <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary">Esencia Eterna</span>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-8 text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 px-3 font-bold border border-primary/10"
+                  className="h-8 text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 px-3 font-bold border border-primary/10 no-flip"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsPreviewOpen(true);
@@ -136,8 +141,6 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete, isAdmin }: C
                     <div className="h-2 w-full bg-primary/5 animate-pulse rounded-full" />
                     <div className="h-2 w-[90%] bg-primary/5 animate-pulse rounded-full" />
                     <div className="h-2 w-[95%] bg-primary/5 animate-pulse rounded-full" />
-                    <div className="h-2 w-[80%] bg-primary/5 animate-pulse rounded-full" />
-                    <div className="h-2 w-[85%] bg-primary/5 animate-pulse rounded-full" />
                   </div>
                 ) : (
                   <p className="text-sm md:text-base font-body leading-relaxed text-foreground/80 italic text-center md:text-left pt-2">
@@ -165,7 +168,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, onDelete, isAdmin }: C
               </div>
               <div>
                 <h2 className="font-headline text-lg md:text-xl text-foreground">Documento Original</h2>
-                <p className="text-[9px] uppercase trackingwidest text-muted-foreground mt-0.5">Nuestros Suspiros Digitalizados</p>
+                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">Nuestros Suspiros Digitalizados</p>
               </div>
             </div>
             <Button 
