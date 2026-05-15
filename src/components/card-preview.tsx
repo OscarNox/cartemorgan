@@ -28,19 +28,17 @@ export function CardPreview({ id, coverImage, pdfDataUri, savedHighlights, onDel
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handleReveal = async () => {
-    // Si ya tenemos la esencia guardada, no llamamos a la IA
-    if (!highlights && !isLoading) {
+    // Si ya tenemos la esencia guardada (eterna), no llamamos a la IA de nuevo
+    if (!highlights && !isLoading && !savedHighlights) {
       setIsLoading(true);
       try {
         const result = await generatePdfHighlights({ pdfDataUri });
         if (result && result.highlights) {
           setHighlights(result.highlights);
-        } else {
-          throw new Error("Respuesta vacía");
         }
       } catch (error) {
         console.error("Error al generar la esencia:", error);
-        setHighlights("No pudimos extraer la esencia. Revisa la configuración de API.");
+        setHighlights("Un suspiro guardado en el tiempo.");
       } finally {
         setIsLoading(false);
       }
@@ -48,9 +46,12 @@ export function CardPreview({ id, coverImage, pdfDataUri, savedHighlights, onDel
     setIsFlipped(true);
   };
 
-  const toggleFlipOnMobile = (e: React.MouseEvent) => {
-    // Evitamos girar si se hace clic en el botón de borrar
-    if ((e.target as HTMLElement).closest('.no-flip')) return;
+  const handleContainerClick = (e: React.MouseEvent) => {
+    // Si el clic viene del botón de borrar o PDF, no girar
+    const target = e.target as HTMLElement;
+    if (target.closest('.action-button')) {
+      return;
+    }
     
     if (window.innerWidth < 768) {
       if (!isFlipped) handleReveal();
@@ -64,7 +65,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, savedHighlights, onDel
         className="relative w-full aspect-[3/4] group perspective-1000 cursor-pointer md:cursor-default"
         onMouseEnter={() => window.innerWidth >= 768 && handleReveal()}
         onMouseLeave={() => window.innerWidth >= 768 && setIsFlipped(false)}
-        onClick={toggleFlipOnMobile}
+        onClick={handleContainerClick}
       >
         <div className={`relative w-full h-full transition-all duration-700 preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
           
@@ -78,8 +79,10 @@ export function CardPreview({ id, coverImage, pdfDataUri, savedHighlights, onDel
                 className="object-cover transition-transform duration-1000 group-hover:scale-110"
                 sizes="(max-width: 768px) 100vw, 400px"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
+              {/* Overlay de gradiente */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+
               <div className="absolute top-4 left-4 z-20">
                 <div className="bg-white/95 p-2.5 border border-primary/20 backdrop-blur-sm shadow-sm">
                   <FileText className="w-5 h-5 text-primary" />
@@ -87,17 +90,17 @@ export function CardPreview({ id, coverImage, pdfDataUri, savedHighlights, onDel
               </div>
 
               {isAdmin && (
-                <div className="absolute bottom-4 right-4 z-30 md:opacity-0 md:group-hover:opacity-100 transition-all no-flip">
+                <div className="absolute bottom-4 right-4 z-40 action-button">
                   <Button
                     variant="destructive"
                     size="icon"
-                    className="h-10 w-10 rounded-none bg-white text-destructive hover:bg-destructive hover:text-white border border-destructive/20 shadow-xl no-flip"
+                    className="h-10 w-10 rounded-none bg-white text-destructive hover:bg-destructive hover:text-white border border-destructive/20 shadow-xl action-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(id);
                     }}
                   >
-                    <Trash2 className="w-4 h-4 no-flip" />
+                    <Trash2 className="w-4 h-4 pointer-events-none" />
                   </Button>
                 </div>
               )}
@@ -125,7 +128,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, savedHighlights, onDel
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-8 text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 px-3 font-bold border border-primary/10 no-flip"
+                  className="h-8 text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5 px-3 font-bold border border-primary/10 action-button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsPreviewOpen(true);
@@ -136,7 +139,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, savedHighlights, onDel
               </div>
               
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                {isLoading ? (
+                {(isLoading && !highlights) ? (
                   <div className="space-y-4 py-6">
                     <div className="h-2 w-full bg-primary/5 animate-pulse rounded-full" />
                     <div className="h-2 w-[90%] bg-primary/5 animate-pulse rounded-full" />
@@ -144,7 +147,7 @@ export function CardPreview({ id, coverImage, pdfDataUri, savedHighlights, onDel
                   </div>
                 ) : (
                   <p className="text-sm md:text-base font-body leading-relaxed text-foreground/80 italic text-center md:text-left pt-2">
-                    {highlights || "Analizando el contenido..."}
+                    {highlights || savedHighlights || "Guardando esencia..."}
                   </p>
                 )}
               </div>

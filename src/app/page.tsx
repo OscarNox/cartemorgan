@@ -67,37 +67,38 @@ export default function CarteBlanchePage() {
   const addCard = async (cover: string, pdf: string) => {
     if (!isAdmin || !db) return;
     
-    // Generamos la esencia ANTES de guardar para que sea eterna
+    // Generamos la esencia ANTES de guardar para que sea eterna y nunca cambie
+    let highlights = "Un suspiro capturado para siempre.";
     try {
       const result = await generatePdfHighlights({ pdfDataUri: pdf });
-      const highlights = result?.highlights || "Esencia guardada en el archivo.";
-      
-      addDocumentNonBlocking(collection(db, 'cards'), {
-        coverImage: cover,
-        pdfDataUri: pdf,
-        highlights: highlights, // Guardado permanentemente
-        uploadedByUserId: user?.uid,
-        createdAt: serverTimestamp()
-      });
+      if (result && result.highlights) {
+        highlights = result.highlights;
+      }
     } catch (error) {
       console.error("Error generando esencia al subir:", error);
-      // Guardamos sin esencia si falla la IA, se podrá generar después
-      addDocumentNonBlocking(collection(db, 'cards'), {
-        coverImage: cover,
-        pdfDataUri: pdf,
-        highlights: null,
-        uploadedByUserId: user?.uid,
-        createdAt: serverTimestamp()
-      });
     }
+
+    addDocumentNonBlocking(collection(db, 'cards'), {
+      coverImage: cover,
+      pdfDataUri: pdf,
+      highlights: highlights, // Guardado permanentemente como parte del registro
+      uploadedByUserId: user?.uid,
+      createdAt: serverTimestamp()
+    });
   };
 
   const deleteCard = (id: string) => {
     if (!isAdmin || !db) return;
-    if (confirm("¿Estás segura de querer eliminar este recuerdo para siempre?")) {
+    
+    // Usamos una confirmación simple y directa
+    const confirmed = window.confirm("¿Estás segura de querer eliminar este recuerdo para siempre?");
+    if (confirmed) {
       const cardRef = doc(db, 'cards', id);
       deleteDocumentNonBlocking(cardRef);
-      toast({ title: "Registro Removido", description: "La carta ha sido eliminada del archivo." });
+      toast({ 
+        title: "Recuerdo Eliminado", 
+        description: "Se ha removido del archivo eterno." 
+      });
     }
   };
 
